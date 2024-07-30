@@ -2,7 +2,36 @@
 This repository contains all code used to analyse and visualise the data from the DynaTag project.
 
 # Code and Data Analysis
-## Data Preprocessing (fastq to count matrix)
+
+## Data Preprocessing (bulk ESC and EpiLC DynaTag)
+
+### Alingment
+### Peak Calling
+### Count Matrix Generation
+
+## Data Preprocessing (single-cell DynaTag)
+
+### Demultiplexing of BCL file
+### Alingment
+### Peak Calling
+### Count and Fragment Matrix Generation
+
+## Data Preprocessing (bulk ESC and EpiLC RNA-seq)
+
+### Alignment 
+### Count Matrix Generation
+
+## Data Preprocessing (bulk SCLC PDX DynaTag)
+
+### Aligment
+### Peak Calling
+### Count Matrix Generation
+
+## Data Preprocessing (single-cell SCLC PDX RNA-seq)
+
+### Demultiplexing and Count Matrix Generation
+
+----
 
 # Figures (Main)
 
