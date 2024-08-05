@@ -28,7 +28,52 @@ done
       --alignMatesGapMax 1000000 \
       --outSAMattributes NH HI NM MD \
       --outSAMtype BAM SortedByCoordinate \
-      --outFileNamePrefix /scratch/phunold/RPM/STAR_aligned_bam_mm10/$f \
+      --outFileNamePrefix /scratch/phunold/$f \
       --readFilesCommand gunzip -c
     done
 ```
+## Downsampling
+```bash
+for file in *.bam; do
+sbatch --mem 8G -J stat5 --mail-type=FAIL --mail-user=phunold@uni-koeln.de --wrap "module load samtools/1.13 && samtools view -c -F 260 $file >  ${file%%.bam}.stat5"
+done
+
+if [ ! -d " downsampled
+" ]; then
+  mkdir downsampled
+fi
+
+for file in *.stat5
+do
+  stat5_file=`cat $file`
+  echo $stat5_file
+  if [ "$stat5_file" -gt 8000000 ]
+  then
+      echo "bigger than 7M" $file
+      factor_down=$(awk -v m=$stat5_file 'BEGIN { print 7000000/m }')
+      echo $factor_down
+      echo "***"
+      sbatch --mem 8G --cpus-per-task 8 --wrap "module load samtools/1.13 && samtools view -@ 8 -s $factor_down -b ${file%%.stat5}.bam > ./downsampled/${file%%.stat5}.8M.bam"
+  else
+    echo " =================> LESS"
+    sbatch --mem 8G --wrap "cp ${file%%.stat5}.bam ${file%%.stat5}.less7M.bam"
+  fi
+  echo "================="
+done
+```
+## Count Reads
+```bash
+if [ ! -d " counts
+" ]; then
+  mkdir counts
+fi
+
+for bam in *.bam
+do
+sbatch --mem 16g --mail-type=FAIL,END --mail-user=phunold@uni-koeln.de --wrap "module load use.own && module load pypack/htseq && htseq-count -f bam -m union -s no -t exon -i gene_id $bam /projects/ag-haensel/Michaela/genome_files/mm10_STAR/Mus_musculus.GRCm38.102_edited.gtf > ./counts/${bam%%.merged.bam}.counts.txt"
+done
+```
+
+
+
+
