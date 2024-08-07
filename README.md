@@ -27,7 +27,7 @@ This repository contains all code used to analyse and visualise the data from th
 ## Figure 1
 
 - [Figure1B-CorrelationPlot](Figure_1_B_-_Correlation_Plot.md)
-- [](Figure_1_C_&_F_&_Figure_SI_1_C_-_FRiP_Score.md)
+- [Figure_1_C_&_F_&_Figure_SI_1_C](Figure_1_C_&_F_&_Figure_SI_1_C_-_FRiP_Score.md)
 
 ### Figure 1 D - IGV Snapshot
 
