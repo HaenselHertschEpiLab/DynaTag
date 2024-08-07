@@ -7,26 +7,18 @@ This repository contains all code used to analyse and visualise the data from th
 - [DynaTag_bulk_ESC_EpiLC](DynaTag_bulk_ESC_EpiLC.md)
 
 ## Data Preprocessing (single-cell DynaTag)
-
-### Demultiplexing of BCL file
-### Alingment
-### Peak Calling
-### Count and Fragment Matrix Generation
+- [DynaTag_sc_ESC](DynaTag_sc_ESC.md)
 
 ## Data Preprocessing (bulk ESC and EpiLC RNA-seq)
 
-### Alignment 
-### Count Matrix Generation
+- [RNA-seq_ESC_EpiLC](RNA-seq_ESC_EpiLC.md)
 
 ## Data Preprocessing (bulk SCLC PDX DynaTag)
-
-### Aligment
-### Peak Calling
-### Count Matrix Generation
+- [DynaTag_bulk_SCLC.md](DynaTag_bulk_SCLC.md)
 
 ## Data Preprocessing (single-cell SCLC PDX RNA-seq)
 
-### Demultiplexing and Count Matrix Generation
+- [RNA-seq_single-cell_SCLC](RNA-seq_single-cell_SCLC.md)
 
 ----
 
