@@ -4,7 +4,7 @@ This repository contains all code used to analyse and visualise the data from th
 # Code and Data Analysis
 
 ## Data Preprocessing (bulk ESC and EpiLC DynaTag)
-- (DynaTag_bulk_ESC_EpiLC.md)
+- [DynaTag_bulk_ESC_EpiLC.md]
 
 ## Data Preprocessing (single-cell DynaTag)
 
