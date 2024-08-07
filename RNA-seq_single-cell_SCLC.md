@@ -1,5 +1,5 @@
 # Data Preprocessing
-## Demultiplexing via SpitPipe
+## Demultiplexing via Split Pipe
 ```bash
 # 1 - Demux Sub Libraries and align against hg38_mm39 (although called mm10 in the path)
 
