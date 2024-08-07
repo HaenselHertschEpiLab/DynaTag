@@ -26,7 +26,7 @@ This repository contains all code used to analyse and visualise the data from th
 
 ## Figure 1
 ### Figure 1 B - Correlation Plot
-- [Figure1B-CorrelationPlot](Figure 1 B - Correlation Plot.md)
+- [Figure1B-CorrelationPlot](Figure_1_B_-_Correlation_Plot.md)
 ### Figure 1 C - FRiP Score
 
 ### Figure 1 D - IGV Snapshot
