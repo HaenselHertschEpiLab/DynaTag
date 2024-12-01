@@ -1,5 +1,5 @@
 # Data Preprocessing
-## Alignment
+## Alignment mm39
 ```bash
 #!/bin/bash
 #SBATCH --time=24:00:00
@@ -16,7 +16,24 @@ f2=${f1%_R1_001.fastq.gz}_R2_001.fastq.gz
 bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -p 16 -I 10 -X 700 -x "$ref" -1 "$f1" -2 "$f2" -S "/scratch/phunold/TFCT/ESC_d2EpiLC_ONSMY/alignment/sam/${f1%%}_bowtie2.sam"
 done
 ```
-## Generate BAM files
+## Alignment mm10
+```bash
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --mem=64gb
+#SBATCH --cpus-per-task=32
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+
+module load bio/Bowtie2/2.5.1-GCC-12.3.0
+ref='/projects/ag-haensel/Pascal/genome_files/mm10_bowtie/ref/ref'
+
+for f1 in *_R1_001.fastq.gz; do
+f2=${f1%_R1_001.fastq.gz}_R2_001.fastq.gz
+bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -p 16 -I 10 -X 700 -x "$ref" -1 "$f1" -2 "$f2" -S "/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/sam/${f1%%}_bowtie2.sam"
+done
+```
+## Generate BAM files mm39
 ```bash
 for f1 in *_bowtie2.sam; do
 sbatch -J StoB --mem 8GB --wrap "module load samtools/1.13 && samtools view -bS -F 0x04 "$f1" > /scratch/phunold/TFCT/ESC_d2EpiLC_ONSMY/alignment/bam/${f1%%}_bowtie2.mapped.bam"
