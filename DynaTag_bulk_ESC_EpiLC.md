@@ -184,7 +184,7 @@ done
 ```
 ## Call Peaks with MACS2 mm39
 ```bash
-for f in *.sorted.bam; do
+for f in *.sort.bam; do
 sbatch -J MACS2 --mem 32GB --wrap "module load use.own && module load pypack/macs2 && macs2 callpeak -t $f -f BAMPE -g mm --keep-dup all -n /scratch/phunold/ESC/peaks/$f --nomodel --extsize 55 -B --SPMR"
 done
 
@@ -194,13 +194,12 @@ for f in *_peaks.narrowPeak; do
   awk '{print $1"\t"$2"\t"$3}' "$f" | sortBed -i - | mergeBed -i - > "${base_name}_peaks.bed"
 done
 ```
-## Call Peaks with MACS2 mm10 still needs to be executed
+## Call Peaks with MACS2 mm10
 ```bash
-for f in *.sorted.bam; do
-sbatch -J MACS2 --mem 32GB --wrap "module load use.own && module load pypack/macs2 && macs2 callpeak -t $f -f BAMPE -g mm --keep-dup all -n /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/$f --nomodel --extsize 55 -B --SPMR"
+for f in *.sort.bam; do
+sbatch -J MACS2 --mem 32GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && macs2 callpeak -t $f -f BAMPE -g mm --keep-dup all -n /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/$f --nomodel --extsize 55 -B --SPMR"
 done
 
-module load bedtools/2.29.2
 for f in *_peaks.narrowPeak; do
   base_name=$(basename "$f" ".sorted.bam_peaks.narrowPeak")
   awk '{print $1"\t"$2"\t"$3}' "$f" | sortBed -i - | mergeBed -i - > "${base_name}_peaks.bed"
