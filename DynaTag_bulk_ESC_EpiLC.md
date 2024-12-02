@@ -26,11 +26,31 @@ done
 #SBATCH --mail-user=rhaensel@uni-koeln.de
 
 module load bio/Bowtie2/2.5.1-GCC-12.3.0
+
+# Reference genome index
 ref='/projects/ag-haensel/Pascal/genome_files/mm10_bowtie/ref/ref'
 
-for f1 in *_R1_001.fastq.gz; do
-f2=${f1%_R1_001.fastq.gz}_R2_001.fastq.gz
-bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -p 16 -I 10 -X 700 -x "$ref" -1 "$f1" -2 "$f2" -S "/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/sam/${f1%%}_bowtie2.sam"
+# Input and output directories
+input_dir='/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/fastq'
+output_dir='/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/sam'
+
+# Ensure the output directory exists
+mkdir -p "$output_dir"
+
+# Loop over input files
+for f1 in "$input_dir"/*_R1_001.fastq.gz; do
+    # Construct the paired R2 file
+    f2=${f1%_R1_001.fastq.gz}_R2_001.fastq.gz
+
+    # Extract the base name (without path and extensions)
+    base_name=$(basename "$f1" _R1_001.fastq.gz)
+
+    # Construct the output SAM file path
+    output_file="$output_dir/${base_name}_bowtie2.sam"
+
+    # Run Bowtie2
+    bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -p 16 -I 10 -X 700 \
+        -x "$ref" -1 "$f1" -2 "$f2" -S "$output_file"
 done
 ```
 ## Generate BAM files mm39
@@ -39,7 +59,13 @@ for f1 in *_bowtie2.sam; do
 sbatch -J StoB --mem 8GB --wrap "module load samtools/1.13 && samtools view -bS -F 0x04 "$f1" > /scratch/phunold/TFCT/ESC_d2EpiLC_ONSMY/alignment/bam/${f1%%}_bowtie2.mapped.bam"
 done
 ```
-## Downsampling
+## Generate BAM files mm10
+```bash
+for f1 in *_bowtie2.sam; do
+sbatch -J StoB --mem 32GB --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -bS -F 0x04 "$f1" > /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/${f1%%}_bowtie2.mapped.bam"
+done
+```
+## Downsampling mm39
 ```bash
 for f1 in *.bam; do
 sbatch --mem 8G -J reads --mail-type=FAIL --mail-user=phunold@uni-koeln.de --wrap "module load samtools/1.13 && samtools view -c -F 260 $f1 >  ${f1%%.bam}.stat5"
@@ -67,16 +93,111 @@ for file in *.bam; do
     sbatch --mem 8G --cpus-per-task 8 --wrap "module load samtools/1.13 && total_reads=\$(samtools view -@ 8 -c -F 260 $file); scaling_factor=\$(bc <<< \"scale=4; $desired_reads / \$total_reads\"); samtools view -@ 8 -bs \"\$scaling_factor\" $file > $output_file"
 done
 ```
-## Sort BAM files
+## Downsampling mm10
+```bash
+#!/bin/bash
+
+# Step 1: Count reads in BAM files
+echo "Step 1: Counting reads in BAM files..."
+num_bam_files=$(ls -1 *.bam | wc -l)
+for f1 in *.bam; do
+    if [[ ! -f "${f1%%.bam}.stat5" ]]; then
+        sbatch --mem 8G -J reads --mail-type=FAIL --mail-user=rhaensel@uni-koeln.de --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -c -F 260 $f1 > ${f1%%.bam}.stat5"
+    fi
+done
+
+# Wait until all .stat5 files are generated
+echo "Waiting for read count jobs to complete..."
+while [ $(ls -1 *.stat5 2>/dev/null | wc -l) -lt $num_bam_files ]; do
+    sleep 60
+done
+echo "Finished counting reads."
+
+# Step 2: Combine results
+echo "Step 2: Combining results..."
+if [[ -f reads.txt ]]; then
+    rm reads.txt  # Remove existing reads.txt to avoid appending duplicates
+fi
+cat *.stat5 > reads.txt
+echo "Finished combining results."
+
+# Step 3: Downsample BAM files
+echo "Step 3: Downsampling BAM files..."
+for file in *.bam; do
+    # Determine desired reads based on file name
+    if [[ "$file" == *"ATAC"* ]]; then
+        desired_reads=15000000
+    elif [[ "$file" == *"MYC"* || "$file" == *"YAP1"* ]]; then
+        desired_reads=5000000
+    elif [[ "$file" == *"OCT4"* ]]; then
+        desired_reads=12000000
+    elif [[ "$file" == *"SOX2"* ]]; then
+        desired_reads=19000000
+    elif [[ "$file" == *"H3K27me3"* || "$file" == *"H3K4me3"* || "$file" == *"CTCF"* || "$file" == *"NANOG"* ]]; then
+        desired_reads=10000000
+    else
+        desired_reads=10000000  # Default desired reads
+    fi
+
+    # Extract base name (adjust according to your file naming convention)
+    base_name="${file%_bowtie2.mapped.bam}"
+
+    # Submit sbatch job
+    sbatch --mem 8G --cpus-per-task 8 --wrap "
+    module load bio/SAMtools/1.19.2-GCC-13.2.0
+    total_reads=\$(samtools view -@ 8 -c -F 260 \"$file\")
+    if [[ \$total_reads -ge $desired_reads ]]; then
+        scaling_factor=\$(bc <<< \"scale=4; $desired_reads / \$total_reads\")
+        output_file=\"${base_name}_${desired_reads}_mm10_norm_clean.bam\"
+        samtools view -@ 8 -bs \"\$scaling_factor\" \"$file\" > \"\$output_file\"
+    else
+        output_file=\"${base_name}_\${total_reads}_mm10_same_clean.bam\"
+        cp \"$file\" \"\$output_file\"
+    fi
+    "
+done
+
+# Optionally, wait for all downsampling jobs to complete
+echo "Waiting for downsampling jobs to complete..."
+total_jobs=$(squeue -u $USER | grep "sbatch" | wc -l)
+while [ $total_jobs -gt 0 ]; do
+    sleep 60
+    total_jobs=$(squeue -u $USER | grep "sbatch" | wc -l)
+done
+echo "Finished downsampling BAM files."
+
+# remove redundancy in file name
+rename '_L001_bowtie2.sam' '' *clean.bam
+```
+
+## Sort BAM files mm39
 ```bash
 for f in *down_bowtie2.mapped.bam; do
  sbatch --mem 8G -J samSort --cpus-per-task 8 --wrap "module load samtools/1.13 && samtools sort -@ 8 $f > ${f%%.bam}.sort.bam"
 done
 ```
-## Call Peaks with MACS2
+## Sort BAM files mm10
+```bash
+for f in *clean.bam; do
+ sbatch --mem 8G -J samSort --cpus-per-task 8 --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools sort -@ 8 $f > ${f%%.bam}.sort.bam"
+done
+```
+## Call Peaks with MACS2 mm39
 ```bash
 for f in *.sorted.bam; do
 sbatch -J MACS2 --mem 32GB --wrap "module load use.own && module load pypack/macs2 && macs2 callpeak -t $f -f BAMPE -g mm --keep-dup all -n /scratch/phunold/ESC/peaks/$f --nomodel --extsize 55 -B --SPMR"
+done
+
+module load bedtools/2.29.2
+for f in *_peaks.narrowPeak; do
+  base_name=$(basename "$f" ".sorted.bam_peaks.narrowPeak")
+  awk '{print $1"\t"$2"\t"$3}' "$f" | sortBed -i - | mergeBed -i - > "${base_name}_peaks.bed"
+done
+```
+## Call Peaks with MACS2 mm10 still needs to be executed
+```bash
+for f in *.sorted.bam; do
+sbatch -J MACS2 --mem 32GB --wrap "module load use.own && module load pypack/macs2 && macs2 callpeak -t $f -f BAMPE -g mm --keep-dup all -n /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/$f --nomodel --extsize 55 -B --SPMR"
 done
 
 module load bedtools/2.29.2
