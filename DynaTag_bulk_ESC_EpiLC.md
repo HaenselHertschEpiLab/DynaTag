@@ -235,7 +235,7 @@ done
 
 echo "FRiP scores have been saved to $output_file"
 ```
-## Filter Consensus Peaks
+## Filter Consensus Peaks mm39
 ```bash
 module load bedtools/2.31.0
 
@@ -345,6 +345,109 @@ awk '{if (($3-$2) >= 60) print $0}' MYC-G2_all_peaks.bed | sortBed -i - | mergeB
 cat ESC-ATAC_master_peaks.bed EpiLC-ATAC_master_peaks.bed | sortBed -i - > ATAC_all_peaks.bed
 awk '{if (($3-$2) >= 60) print $0}' ATAC_all_peaks.bed | sortBed -i - | mergeBed -i - > ATAC_all_peaks.over59nt.sorted.bed
 ```
+## Filter Consensus Peaks mm10
+```bash
+
+nano filter_consensus_peaks_mm10.sh
+
+multiIntersectBed -i ESC-OCT4-G1*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-OCT4-G1_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-OCT4-G1*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-OCT4-G1_master_peaks.bed
+
+multiIntersectBed -i ESC-OCT4-S*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-OCT4-S_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-OCT4-S*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-OCT4-S_master_peaks.bed
+
+multiIntersectBed -i ESC-OCT4-G2*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-OCT4-G2_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-OCT4-G2*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-OCT4-G2_master_peaks.bed
+
+multiIntersectBed -i ESC-SOX2-G1*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-SOX2-G1_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-SOX2-G1*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-SOX2-G1_master_peaks.bed
+
+multiIntersectBed -i ESC-SOX2-S*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-SOX2-S_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-SOX2-S*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-SOX2-S_master_peaks.bed
+
+multiIntersectBed -i ESC-SOX2-G2*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-SOX2-G2_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-SOX2-G2*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-SOX2-G2_master_peaks.bed
+
+multiIntersectBed -i ESC-NANOG-G1*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-NANOG-G1_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-NANOG-G1*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-NANOG-G1_master_peaks.bed
+
+multiIntersectBed -i ESC-NANOG-S*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-NANOG-S_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-NANOG-S*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-NANOG-S_master_peaks.bed
+
+multiIntersectBed -i ESC-NANOG-G2*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-NANOG-G2_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-NANOG-G2*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-NANOG-G2_master_peaks.bed
+
+multiIntersectBed -i ESC-YAP1-G1*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-YAP1-G1_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-YAP1-G1*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-YAP1-G1_master_peaks.bed
+
+multiIntersectBed -i ESC-YAP1-S*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-YAP1-S_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-YAP1-S*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-YAP1-S_master_peaks.bed
+
+multiIntersectBed -i ESC-YAP1-G2*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-YAP1-G2_master_peaks.bed
+multiIntersectBed -i EpiLC-d2-YAP1-G2*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-YAP1-G2_master_peaks.bed
+
+multiIntersectBed -i ESC-MYC-G1*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-MYC-G1_master_peaks.bed
+multiIntersectBed -i EpiLC-2d-MYC-G1*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-MYC-G1_master_peaks.bed
+
+multiIntersectBed -i ESC-MYC-S*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-MYC-S_master_peaks.bed
+multiIntersectBed -i EpiLC-2d-MYC-S*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-MYC-S_master_peaks.bed
+
+multiIntersectBed -i ESC-MYC-G2*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > ESC-MYC-G2_master_peaks.bed
+multiIntersectBed -i EpiLC-2d-MYC-G2*_peaks.bed | awk '{if($4>=2) print $0}' | sortBed -i - | mergeBed -i - > EpiLC-MYC-G2_master_peaks.bed
+
+cat ESC-OCT4-G1_master_peaks.bed EpiLC-OCT4-G1_master_peaks.bed | sortBed -i - > OCT4-G1_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' OCT4-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > OCT4-G1_all_peaks.over59nt.sorted.bed
+
+cat ESC-OCT4-S_master_peaks.bed EpiLC-OCT4-S_master_peaks.bed | sortBed -i - > OCT4-S_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' OCT4-S_all_peaks.bed | sortBed -i - | mergeBed -i - > OCT4-S_all_peaks.over59nt.sorted.bed
+
+cat ESC-OCT4-G2_master_peaks.bed EpiLC-OCT4-G2_master_peaks.bed | sortBed -i - > OCT4-G2_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' OCT4-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > OCT4-G2_all_peaks.over59nt.sorted.bed
+
+
+cat ESC-SOX2-G1_master_peaks.bed EpiLC-SOX2-G1_master_peaks.bed | sortBed -i - > SOX2-G1_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' SOX2-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > SOX2-G1_all_peaks.over59nt.sorted.bed
+
+cat ESC-SOX2-S_master_peaks.bed EpiLC-SOX2-S_master_peaks.bed | sortBed -i - > SOX2-S_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' SOX2-S_all_peaks.bed | sortBed -i - | mergeBed -i - > SOX2-S_all_peaks.over59nt.sorted.bed
+
+cat ESC-SOX2-G2_master_peaks.bed EpiLC-SOX2-G2_master_peaks.bed | sortBed -i - > SOX2-G2_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' SOX2-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > SOX2-G2_all_peaks.over59nt.sorted.bed
+
+
+cat ESC-NANOG-G1_master_peaks.bed EpiLC-NANOG-G1_master_peaks.bed | sortBed -i - > NANOG-G1_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' NANOG-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > NANOG-G1_all_peaks.over59nt.sorted.bed
+
+cat ESC-NANOG-S_master_peaks.bed EpiLC-NANOG-S_master_peaks.bed | sortBed -i - > NANOG-S_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' NANOG-S_all_peaks.bed | sortBed -i - | mergeBed -i - > NANOG-S_all_peaks.over59nt.sorted.bed
+
+cat ESC-NANOG-G2_master_peaks.bed EpiLC-NANOG-G2_master_peaks.bed | sortBed -i - > NANOG-G2_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' NANOG-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > NANOG-G2_all_peaks.over59nt.sorted.bed
+
+
+cat ESC-YAP1-G1_master_peaks.bed EpiLC-YAP1-G1_master_peaks.bed | sortBed -i - > YAP1-G1_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' YAP1-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > YAP1-G1_all_peaks.over59nt.sorted.bed
+
+cat ESC-YAP1-S_master_peaks.bed EpiLC-YAP1-S_master_peaks.bed | sortBed -i - > YAP1-S_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' YAP1-S_all_peaks.bed | sortBed -i - | mergeBed -i - > YAP1-S_all_peaks.over59nt.sorted.bed
+
+cat ESC-YAP1-G2_master_peaks.bed EpiLC-YAP1-G2_master_peaks.bed | sortBed -i - > YAP1-G2_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' YAP1-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > YAP1-G2_all_peaks.over59nt.sorted.bed
+
+
+cat ESC-MYC-G1_master_peaks.bed EpiLC-MYC-G1_master_peaks.bed | sortBed -i - > MYC-G1_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' MYC-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > MYC-G1_all_peaks.over59nt.sorted.bed
+
+cat ESC-MYC-S_master_peaks.bed EpiLC-MYC-S_master_peaks.bed | sortBed -i - > MYC-S_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' MYC-S_all_peaks.bed | sortBed -i - | mergeBed -i - > MYC-S_all_peaks.over59nt.sorted.bed
+
+cat ESC-MYC-G2_master_peaks.bed EpiLC-MYC-G2_master_peaks.bed | sortBed -i - > MYC-G2_all_peaks.bed
+awk '{if (($3-$2) >= 60) print $0}' MYC-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > MYC-G2_all_peaks.over59nt.sorted.bed
+
+rm *_all_peaks.bed
+```
+
+
 ## Generate Count Matrices
 ```bash
 #!/bin/bash -l
