@@ -53,6 +53,65 @@ for f1 in "$input_dir"/*_R1_001.fastq.gz; do
         -x "$ref" -1 "$f1" -2 "$f2" -S "$output_file"
 done
 ```
+
+## Alignment mm10 GSE224292_mESC_CUTnRUN
+```bash
+#!/bin/bash
+
+# SLURM parameters for each job
+TIME="24:00:00"
+MEM="16gb"
+CPUS="8"
+EMAIL="rhaensel@uni-koeln.de"
+
+# Reference genome index
+ref='/projects/ag-haensel/Pascal/genome_files/mm10_bowtie/ref/ref'
+
+# Input and output directories
+input_dir='/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/fastq/GSE224292_mESC_CUTnRUN_fastq_clean'
+output_dir='/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/sam/GSE224292_mESC_CUTnRUN_sam'
+
+# Ensure the output directory exists
+mkdir -p "$output_dir"
+
+# Loop over input files
+for f1 in "$input_dir"/*_1.fastq; do
+    # Construct the paired R2 file
+    f2=${f1%_1.fastq}_2.fastq
+
+    # Extract the base name (without path and extensions)
+    base_name=$(basename "$f1" _1.fastq)
+
+    # Construct the output SAM file path
+    output_file="$output_dir/${base_name}_bowtie2.sam"
+
+    # Create a temporary SLURM script for each job
+    job_script=$(mktemp)
+
+    cat > "$job_script" <<EOF
+#!/bin/bash
+#SBATCH --job-name=bowtie2_${base_name}
+#SBATCH --time=$TIME
+#SBATCH --mem=$MEM
+#SBATCH --cpus-per-task=$CPUS
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=$EMAIL
+
+module load bio/Bowtie2/2.5.1-GCC-12.3.0
+
+# Run Bowtie2
+bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -p $CPUS -I 10 -X 700 \
+    -x "$ref" -1 "$f1" -2 "$f2" -S "$output_file"
+EOF
+
+    # Submit the job
+    sbatch "$job_script"
+
+    # Optionally remove the temporary script (keep for debugging if needed)
+    rm "$job_script"
+done
+
+```
 ## Generate BAM files mm39
 ```bash
 for f1 in *_bowtie2.sam; do
@@ -63,6 +122,12 @@ done
 ```bash
 for f1 in *_bowtie2.sam; do
 sbatch -J StoB --mem 32GB --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -bS -F 0x04 "$f1" > /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/${f1%%}_bowtie2.mapped.bam"
+done
+```
+## Generate BAM files mm10 GSE224292_mESC_CUTnRUN
+```bash
+for f1 in *_bowtie2.sam; do
+sbatch -J StoB --mem 32GB --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -bS -F 0x04 "$f1" > /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSE224292_mESC_CUTnRUN_bam/${f1%%}_bowtie2.mapped.bam"
 done
 ```
 ## Downsampling mm39
@@ -169,7 +234,61 @@ echo "Finished downsampling BAM files."
 # remove redundancy in file name
 rename '_L001_bowtie2.sam' '' *clean.bam
 ```
+## Downsampling mm10 GSE224292_mESC_CUTnRUN
+```bash
+#!/bin/bash
 
+# Step 1: Count reads in BAM files
+echo "Step 1: Counting reads in BAM files..."
+num_bam_files=$(ls -1 *.bam | wc -l)
+for f1 in *.bam; do
+    if [[ ! -f "${f1%%.bam}.stat5" ]]; then
+        sbatch --mem 8G -J reads --mail-type=FAIL --mail-user=rhaensel@uni-koeln.de --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -c -F 260 $f1 > ${f1%%.bam}.stat5"
+    fi
+done
+
+# Wait until all .stat5 files are generated
+echo "Waiting for read count jobs to complete..."
+while [ $(ls -1 *.stat5 2>/dev/null | wc -l) -lt $num_bam_files ]; do
+    sleep 60
+done
+echo "Finished counting reads."
+
+# Step 2: Combine results
+echo "Step 2: Combining results..."
+if [[ -f reads.txt ]]; then
+    rm reads.txt  # Remove existing reads.txt to avoid appending duplicates
+fi
+cat *.stat5 > reads.txt
+echo "Finished combining results."
+
+# Step 3: Downsample BAM files
+echo "Step 3: Downsampling BAM files..."
+for file in *.bam; do
+    # Determine desired reads based on file name
+    if [[ "$file" == *"SRR"* ]]; then
+        desired_reads=10000000
+   else
+        desired_reads=10000000  # Default desired reads
+    fi
+
+    # Extract base name (adjust according to your file naming convention)
+    base_name="${file%_bowtie2.mapped.bam}"
+
+    # Submit sbatch job
+    sbatch --mem 8G --cpus-per-task 8 --wrap "
+    module load bio/SAMtools/1.19.2-GCC-13.2.0
+    total_reads=\$(samtools view -@ 8 -c -F 260 \"$file\")
+    if [[ \$total_reads -ge $desired_reads ]]; then
+        scaling_factor=\$(bc <<< \"scale=4; $desired_reads / \$total_reads\")
+        output_file=\"${base_name}_${desired_reads}_mm10_norm_clean.bam\"
+        samtools view -@ 8 -bs \"\$scaling_factor\" \"$file\" > \"\$output_file\"
+    else
+        output_file=\"${base_name}_\${total_reads}_mm10_same_clean.bam\"
+        cp \"$file\" \"\$output_file\"
+    fi
+    "
+done
 ## Sort BAM files mm39
 ```bash
 for f in *down_bowtie2.mapped.bam; do
@@ -181,6 +300,21 @@ done
 for f in *clean.bam; do
  sbatch --mem 8G -J samSort --cpus-per-task 8 --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools sort -@ 8 $f > ${f%%.bam}.sort.bam"
 done
+```
+## Sort BAM files mm10 GSE224292_mESC_CUTnRUN
+```bash
+for f in *clean.bam; do
+ sbatch --mem 8G -J samSort --cpus-per-task 8 --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools sort -@ 8 $f > ${f%%.bam}.sort.bam"
+done
+rename 'bowtie2.sam_' '' *_bowtie2.sam_*
+rename 'SRR23310225' 'SRR23310225_SOX2_CUTnRUN_SL' *
+rename 'SRR23310227' 'SRR23310227_SOX2_CUTnRUN_2i' *
+rename 'SRR23310247' 'SRR23310247_OCT4_CUTnRUN_SL' *
+rename 'SRR23310248' 'SRR23310248_OCT4_CUTnRUN_2i' *
+rename 'SRR23310249' 'SRR23310249_NANOG_CUTnRUN_SL' *
+rename 'SRR23310250' 'SRR23310250_NANOG_CUTnRUN_2i' *
+rename 'SRR23310254' 'SRR23310254_IgG_CUTnRUN_SL' *
+rename 'SRR23310255' 'SRR23310255_IgG_CUTnRUN_2i' *
 ```
 ## Call Peaks with MACS2 mm39
 ```bash
@@ -199,6 +333,57 @@ done
 for f in *.sort.bam; do
 sbatch -J MACS2 --mem 32GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && macs2 callpeak -t $f -f BAMPE -g mm --keep-dup all -n /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/$f --nomodel --extsize 55 -B --SPMR"
 done
+
+for f in *_peaks.narrowPeak; do
+  base_name=$(basename "$f" ".sorted.bam_peaks.narrowPeak")
+  awk '{print $1"\t"$2"\t"$3}' "$f" | sortBed -i - | mergeBed -i - > "${base_name}_peaks.bed"
+done
+```
+## Call Peaks with MACS2 mm10 GSE224292_mESC_CUTnRUN
+```bash
+#!/bin/bash
+
+# Define the mapping of treatment (-t) files to control (-c) files
+declare -A controls
+controls=(
+    ["SRR23310225_SOX2_CUTnRUN_SL_10000000_mm10_norm_clean.sort.bam"]="SRR23310254_IgG_CUTnRUN_SL_10000000_mm10_norm_clean.sort.bam"
+    ["SRR23310227_SOX2_CUTnRUN_2i_10000000_mm10_norm_clean.sort.bam"]="SRR23310255_IgG_CUTnRUN_2i_10000000_mm10_norm_clean.sort.bam"
+    ["SRR23310247_OCT4_CUTnRUN_SL_10000000_mm10_norm_clean.sort.bam"]="SRR23310254_IgG_CUTnRUN_SL_10000000_mm10_norm_clean.sort.bam"
+    ["SRR23310248_OCT4_CUTnRUN_2i_10000000_mm10_norm_clean.sort.bam"]="SRR23310255_IgG_CUTnRUN_2i_10000000_mm10_norm_clean.sort.bam"
+    ["SRR23310249_NANOG_CUTnRUN_SL_10000000_mm10_norm_clean.sort.bam"]="SRR23310254_IgG_CUTnRUN_SL_10000000_mm10_norm_clean.sort.bam"
+    ["SRR23310250_NANOG_CUTnRUN_2i_10000000_mm10_norm_clean.sort.bam"]="SRR23310255_IgG_CUTnRUN_2i_10000000_mm10_norm_clean.sort.bam"
+)
+
+# Directory to store peak results
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_GSE224292_mESC_CUTnRUN"
+
+# Loop over all treatment files and run MACS2 with the corresponding control
+for t_file in *_mm10_norm_clean.sort.bam; do
+    # Get the corresponding control file from the mapping
+    c_file=${controls[$t_file]}
+    
+    # Check if the control file is found in the mapping
+    if [ -z "$c_file" ]; then
+        echo "No control file found for $t_file. Skipping..."
+        continue
+    fi
+
+    # Construct the output prefix
+    output_prefix="$peak_dir/$(basename "$t_file" .bam)"
+    
+    # Submit the SLURM job
+    sbatch -J MACS2 --mem 32GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && macs2 callpeak -t $t_file -c $c_file -f BAMPE -g mm --keep-dup all -n $output_prefix --nomodel --extsize 55 -B --SPMR"
+done
+
+(abc-model-env) [rhaensel@ramses1 peaks_GSE224292_mESC_CUTnRUN]$ wc -l *narrowPeak
+   1342 SRR23310225_SOX2_CUTnRUN_SL_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+   1753 SRR23310227_SOX2_CUTnRUN_2i_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+     40 SRR23310247_OCT4_CUTnRUN_SL_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+    299 SRR23310248_OCT4_CUTnRUN_2i_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+   8397 SRR23310249_NANOG_CUTnRUN_SL_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+  19361 SRR23310250_NANOG_CUTnRUN_2i_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+
+#stopped here because peaks are quite low, we will use denovo peak calling without input.
 
 for f in *_peaks.narrowPeak; do
   base_name=$(basename "$f" ".sorted.bam_peaks.narrowPeak")
