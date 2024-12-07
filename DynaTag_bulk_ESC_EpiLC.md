@@ -110,7 +110,63 @@ EOF
     # Optionally remove the temporary script (keep for debugging if needed)
     rm "$job_script"
 done
+```
+## Alignment mm10 GSM4291125_mESC_ChIPseq
+```bash
+#!/bin/bash
 
+# SLURM parameters for each job
+TIME="24:00:00"
+MEM="32gb"
+CPUS="8"
+EMAIL="rhaensel@uni-koeln.de"
+
+# Reference genome index
+ref='/projects/ag-haensel/Pascal/genome_files/mm10_bowtie/ref/ref'
+
+# Input and output directories
+input_dir='/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/fastq/GSM4291125_mESC_ChIPseq_fastq_clean'
+output_dir='/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/sam/GSM4291125_mESC_ChIPseq_sam'
+
+# Ensure the output directory exists
+mkdir -p "$output_dir"
+
+# Loop over input files
+for f1 in "$input_dir"/*_1.fastq; do
+    # Construct the paired R2 file
+    f2=${f1%_1.fastq}_2.fastq
+
+    # Extract the base name (without path and extensions)
+    base_name=$(basename "$f1" _1.fastq)
+
+    # Construct the output SAM file path
+    output_file="$output_dir/${base_name}_bowtie2.sam"
+
+    # Create a temporary SLURM script for each job
+    job_script=$(mktemp)
+
+    cat > "$job_script" <<EOF
+#!/bin/bash
+#SBATCH --job-name=bowtie2_${base_name}
+#SBATCH --time=$TIME
+#SBATCH --mem=$MEM
+#SBATCH --cpus-per-task=$CPUS
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=$EMAIL
+
+module load bio/Bowtie2/2.5.1-GCC-12.3.0
+
+# Run Bowtie2
+bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -p $CPUS -I 10 -X 700 \
+    -x "$ref" -1 "$f1" -2 "$f2" -S "$output_file"
+EOF
+
+    # Submit the job
+    sbatch "$job_script"
+
+    # Optionally remove the temporary script (keep for debugging if needed)
+    rm "$job_script"
+done
 ```
 ## Generate BAM files mm39
 ```bash
@@ -128,6 +184,17 @@ done
 ```bash
 for f1 in *_bowtie2.sam; do
 sbatch -J StoB --mem 32GB --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -bS -F 0x04 "$f1" > /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSE224292_mESC_CUTnRUN_bam/${f1%%}_bowtie2.mapped.bam"
+done
+```
+## Generate BAM files mm10 GSM4291125_mESC_ChIPseq ---> still needs to be done
+```bash
+for f1 in *_bowtie2.sam; do
+sbatch -J StoB --mem 32GB --wrap "
+module load bio/SAMtools/1.19.2-GCC-13.2.0 && \
+samtools view -bS -F 0x04 \"$f1\" > temp.bam && \
+samtools sort temp.bam -o temp_sorted.bam && \
+samtools markdup -r temp_sorted.bam /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSM4291125_mESC_ChIPseq_bam/${f1%%}_bowtie2.mapped.rmdup.bam && \
+rm temp.bam temp_sorted.bam"
 done
 ```
 ## Downsampling mm39
@@ -556,7 +623,47 @@ echo "FRiP scores have been saved to $output_file"
 ```
 ## Calculate FRiP Scores mm10 GSE224292_mESC_CUTnRUN_no.control
 ```bash
+nano FRiP_mm10_GSE224292_mESC_CUTnRUN_no_control.sh
+#!/bin/bash
 
+# Directories
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSE224292_mESC_CUTnRUN_bam"
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_GSE224292_mESC_CUTnRUN_no.control"
+output_file="FRiP_scores_no_control.txt"
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+# Initialize the output file
+> "$output_file"
+
+# Process each BAM file
+for bam_file in "$bam_dir"/*_10000000_mm10_norm_clean.sort.bam; do
+    # Extract the base name of the BAM file
+    base_name=$(basename "$bam_file" _10000000_mm10_norm_clean.sort.bam)
+
+    # Construct the corresponding peak file path
+    peaks_bed="$peak_dir/${base_name}_10000000_mm10_norm_clean.sort_peaks.narrowPeak_peaks_no.control.bed"
+
+    # Check if the peak file exists
+    if [ -f "$peaks_bed" ]; then
+        echo "Processing BAM file: $bam_file with Peaks: $peaks_bed"
+
+        # Calculate FRiP score as a fraction
+        bedtools intersect -abam "$bam_file" -b "$peaks_bed" -wa -u > overlapping_reads.bam
+        total_reads=$(samtools view -c -f 0x2 "$bam_file")
+        reads_in_peaks=$(samtools view -c -f 0x2 overlapping_reads.bam)
+        FRiP=$(bc -l <<< "$reads_in_peaks / $total_reads")
+        echo "Sample: $base_name - FRiP Score: $FRiP" >> "$output_file"
+
+        # Clean up temporary files
+        rm overlapping_reads.bam
+    else
+        echo "No matching peak file found for BAM file: $bam_file"
+    fi
+done
+
+echo "FRiP scores have been saved to $output_file"
 ```
 
 
