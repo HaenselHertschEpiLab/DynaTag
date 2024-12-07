@@ -341,6 +341,10 @@ done
 ```
 ## Call Peaks with MACS2 mm10 GSE224292_mESC_CUTnRUN
 ```bash
+#create script that considers matched IgG control as -c during peak calling 
+nano run_macs2_callpeak.sh
+./run_macs2_callpeak.sh
+
 #!/bin/bash
 
 # Define the mapping of treatment (-t) files to control (-c) files
@@ -383,14 +387,53 @@ done
    8397 SRR23310249_NANOG_CUTnRUN_SL_10000000_mm10_norm_clean.sort_peaks.narrowPeak
   19361 SRR23310250_NANOG_CUTnRUN_2i_10000000_mm10_norm_clean.sort_peaks.narrowPeak
 
-#stopped here because peaks are quite low, we will use denovo peak calling without input.
+# perform peak callign as exactly as dine for DynaTag, don't consider IgG controls
+nano run_macs2_callpeak_no_control.sh
 
+#!/bin/bash
+
+# Define the output directory
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_GSE224292_mESC_CUTnRUN_no.control"
+
+# Create the output directory if it doesn't exist
+mkdir -p "$peak_dir"
+
+# Loop over all treatment files and exclude IgG libraries
+for t_file in *_mm10_norm_clean.sort.bam; do
+    # Skip IgG libraries
+    if [[ "$t_file" == *"IgG"* ]]; then
+        echo "Skipping IgG library: $t_file"
+        continue
+    fi
+
+    # Construct the output prefix
+    output_prefix="$peak_dir/$(basename "$t_file" .bam)"
+    
+    # Submit the SLURM job
+    sbatch -J MACS2 --mem 32GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && macs2 callpeak -t $t_file -f BAMPE -g mm --keep-dup all -n $output_prefix --nomodel --extsize 55 -B --SPMR"
+done
+
+(/home/rhaensel/intervene_env) [rhaensel@ramses1 peaks_GSE224292_mESC_CUTnRUN_no.control]$ wc -l *narrowPeak
+   2318 SRR23310225_SOX2_CUTnRUN_SL_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+   2479 SRR23310227_SOX2_CUTnRUN_2i_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+    216 SRR23310247_OCT4_CUTnRUN_SL_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+    733 SRR23310248_OCT4_CUTnRUN_2i_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+   7242 SRR23310249_NANOG_CUTnRUN_SL_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+  15115 SRR23310250_NANOG_CUTnRUN_2i_10000000_mm10_norm_clean.sort_peaks.narrowPeak
+
+/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_GSE224292_mESC_CUTnRUN
 for f in *_peaks.narrowPeak; do
   base_name=$(basename "$f" ".sorted.bam_peaks.narrowPeak")
   awk '{print $1"\t"$2"\t"$3}' "$f" | sortBed -i - | mergeBed -i - > "${base_name}_peaks.bed"
 done
+/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_GSE224292_mESC_CUTnRUN_no.control
+for f in *_peaks.narrowPeak; do
+  base_name=$(basename "$f" ".sorted.bam_peaks.narrowPeak")
+  awk '{print $1"\t"$2"\t"$3}' "$f" | sortBed -i - | mergeBed -i - > "${base_name}_peaks_no.control.bed"
+done
 ```
-## Calculate FRiP Scores
+
+## Calculate FRiP Scores mm39
 ```bash
 #!/bin/bash
 
@@ -420,6 +463,103 @@ done
 
 echo "FRiP scores have been saved to $output_file"
 ```
+## Calculate FRiP Scores mm10 
+```bash
+nano FRiP_mm10_DynaTag.sh
+
+#!/bin/bash
+
+# Directories
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam"
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks"
+output_file="FRiP_scores.txt"
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+# Initialize the output file
+> "$output_file"
+
+# Process each BAM file
+for bam_file in "$bam_dir"/*_mm10_norm_clean.sort.bam; do
+    # Extract the base name of the BAM file
+    base_name=$(basename "$bam_file" _mm10_norm_clean.sort.bam)
+
+    # Construct the corresponding peak file path
+    peaks_bed="$peak_dir/${base_name}_mm10_norm_clean.sort.bam_peaks.narrowPeak_peaks.bed"
+
+    # Check if the peak file exists
+    if [ -f "$peaks_bed" ]; then
+        echo "Processing BAM file: $bam_file with Peaks: $peaks_bed"
+
+        # Calculate FRiP score
+        bedtools intersect -abam "$bam_file" -b "$peaks_bed" -wa -u > overlapping_reads.bam
+        total_reads=$(samtools view -c -f 0x2 "$bam_file")
+        reads_in_peaks=$(samtools view -c -f 0x2 overlapping_reads.bam)
+        FRiP=$(bc -l <<< "$reads_in_peaks / $total_reads")
+        echo "Sample: $base_name - FRiP Score: $FRiP" >> "$output_file"
+        
+        # Clean up temporary files
+        rm overlapping_reads.bam
+    else
+        echo "No matching peak file found for BAM file: $bam_file"
+    fi
+done
+
+echo "FRiP scores have been saved to $output_file"
+```
+## Calculate FRiP Scores mm10 GSE224292_mESC_CUTnRUN
+```bash
+nano FRiP_mm10_GSE224292_mESC_CUTnRUN.sh
+chmod +x FRiP_mm10_GSE224292_mESC_CUTnRUN.sh
+
+#!/bin/bash
+
+# Directories
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSE224292_mESC_CUTnRUN_bam"
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_GSE224292_mESC_CUTnRUN"
+output_file="FRiP_scores.txt"
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+# Initialize the output file
+> "$output_file"
+
+# Process each BAM file
+for bam_file in "$bam_dir"/*_10000000_mm10_norm_clean.sort.bam; do
+    # Extract the base name of the BAM file
+    base_name=$(basename "$bam_file" _10000000_mm10_norm_clean.sort.bam)
+
+    # Construct the corresponding peak file path
+    peaks_bed="$peak_dir/${base_name}_10000000_mm10_norm_clean.sort_peaks.narrowPeak_peaks.bed"
+
+    # Check if the peak file exists
+    if [ -f "$peaks_bed" ]; then
+        echo "Processing BAM file: $bam_file with Peaks: $peaks_bed"
+
+        # Calculate FRiP score
+        bedtools intersect -abam "$bam_file" -b "$peaks_bed" -wa -u > overlapping_reads.bam
+        total_reads=$(samtools view -c -f 0x2 "$bam_file")
+        reads_in_peaks=$(samtools view -c -f 0x2 overlapping_reads.bam)
+        FRiP=$(bc -l <<< "$reads_in_peaks / $total_reads")
+        echo "Sample: $base_name - FRiP Score: $FRiP" >> "$output_file"
+        
+        # Clean up temporary files
+        rm overlapping_reads.bam
+    else
+        echo "No matching peak file found for BAM file: $bam_file"
+    fi
+done
+
+echo "FRiP scores have been saved to $output_file"
+```
+## Calculate FRiP Scores mm10 GSE224292_mESC_CUTnRUN_no.control
+```bash
+
+```
+
+
 ## Filter Consensus Peaks mm39
 ```bash
 module load bedtools/2.31.0
