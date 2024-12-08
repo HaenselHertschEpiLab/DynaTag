@@ -1152,7 +1152,7 @@ rm *_all_peaks.bed
 ```
 
 
-## Generate Count Matrices
+## Generate Count Matrices mm39
 ```bash
 #!/bin/bash -l
 #SBATCH --time=4:00:00
@@ -1184,7 +1184,7 @@ for cell_line in "${cell_lines[@]}"; do
     done
 done
 ```
-## Generate BigWig Files for optical inspection
+## Generate BigWig Files for optical inspection mm39
 ```bash
 
 sbatch -J merge_sort --mem 8GB --wrap "module load samtools/1.13 && samtools merge - EpiLC-2d-MYC-G1-*down_bowtie2.mapped.bam.sorted.bam | samtools sort -o EpiLC-2d-MYC-G1.merged.sorted.bam -"
@@ -1251,7 +1251,84 @@ for f1 in *merged.sorted.bam; do
 sbatch --mem 16G -J BAM2BW --cpus-per-task 8 --wrap "module load use.own && module load pypack/deeptools && bamCoverage -p 8 -b $f1 -bs 10 --skipNAs --centerReads --normalizeUsing CPM -of bigwig -o ./${f1%%.sorted.bam}_cpm.bw "
 done
 ```
-## plotCorrelation
+## Generate BigWig Files for optical inspection mm10
+```bash
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-2d-MYC-G1-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-2d-MYC-G1.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-2d-MYC-S-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-2d-MYC-S.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-2d-MYC-G2-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-2d-MYC-G2.mm10.merged.sorted.bam -"
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-MYC-G1-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-MYC-G1.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-MYC-S-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-MYC-S.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-MYC-G2-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-MYC-G2.mm10.merged.sorted.bam -"
+
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-OCT4-G1-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-OCT4-G1.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-OCT4-S-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-OCT4-S.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-OCT4-G2-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-OCT4-G2.mm10.merged.sorted.bam -"
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-OCT4-G1-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-OCT4-G1.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-OCT4-S-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-OCT4-S.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-OCT4-G2-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-OCT4-G2.mm10.merged.sorted.bam -"
+
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-SOX2-G1-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-SOX2-G1.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-SOX2-S-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-SOX2-S.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-SOX2-G2-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-SOX2-G2.mm10.merged.sorted.bam -"
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-SOX2-G1-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-SOX2-G1.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-SOX2-S-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-SOX2-S.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-SOX2-G2-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-SOX2-G2.mm10.merged.sorted.bam -"
+
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-NANOG-G1-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-NANOG-G1.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-NANOG-S-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-NANOG-S.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-NANOG-G2-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-NANOG-G2.mm10.merged.sorted.bam -"
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-NANOG-G1-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-NANOG-G1.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-NANOG-S-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-NANOG-S.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-NANOG-G2-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-NANOG-G2.mm10.merged.sorted.bam -"
+
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-YAP1-G1-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-YAP1-G1.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-YAP1-S-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-YAP1-S.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - EpiLC-d2-YAP1-G2-*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-d2-YAP1-G2.mm10.merged.sorted.bam -"
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-YAP1-G1-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-YAP1-G1.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-YAP1-S-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-YAP1-S.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-YAP1-G2-*_mm10_norm_clean.sort.bam | samtools sort -o ESC-YAP1-G2.mm10.merged.sorted.bam -"
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-CTCF-ICS*__mm10_norm_clean.sort.bam | samtools sort -o ESC-CTCF-ICS.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-CTCF-W300*__mm10_norm_clean.sort.bam | samtools sort -o ESC-CTCF-W300.mm10.merged.sorted.bam -"
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-H3K27me3-ICS*__mm10_norm_clean.sort.bam | samtools sort -o ESC-H3K27me3-ICS.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-H3K27me3-W300*__mm10_norm_clean.sort.bam | samtools sort -o ESC-H3K27me3-W300.mm10.merged.sorted.bam -"
+
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-H3K4me3-ICS*__mm10_norm_clean.sort.bam | samtools sort -o ESC-H3K4me3-ICS.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-H3K4me3-W300*__mm10_norm_clean.sort.bam | samtools sort -o ESC-H3K4me3-W300.mm10.merged.sorted.bam -"
+
+for f1 in *merged.sorted.bam; do
+sbatch -J BAMindex --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools index $f1"
+done
+
+for f1 in *merged.sorted.bam; do
+sbatch --mem 16G -J BAM2BW --cpus-per-task 8 --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && bamCoverage -p 8 -b $f1 -bs 10 --skipNAs --centerReads --normalizeUsing CPM -of bigwig -o /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bigwig/${f1%%.sorted.bam}_cpm.bw"
+done
+```
+## Generate BigWig Files for optical inspection mm10 GSE224292_mESC_CUTnRUN --> not performed since spike-in normalised bigwigs are available under GSE224292 by authors and used for comparison with DynaTag mm10 and GSM4291125_mESC_ChIPseq mm10
+
+## Generate BigWig Files for optical inspection mm10 GSM4291125_mESC_ChIPseq_bam
+```bash
+
+for f1 in *_mm10_norm_clean.sort.bam; do
+sbatch -J BAMindex --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools index $f1"
+done
+
+for f1 in *_mm10_norm_clean.sort.bam; do
+sbatch --mem 16G -J BAM2BW --cpus-per-task 8 --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && bamCoverage -p 8 -b $f1 -bs 10 --skipNAs --centerReads --normalizeUsing CPM -of bigwig -o /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bigwig/${f1%%.sort.bam}_cpm.bw"
+done
+```
+## plotCorrelation mm39
 ```bash
 
 sbatch --mem 16G -J mBaSum --cpus-per-task 8 --wrap "module load use.own && module load pypack/deeptools && multiBamSummary bins -bs 10 -b ESC-CTCF-W300.merged.sorted.bam ESC-CTCF-ICS.merged.sorted.bam -p 8 -o CTCF_W300vsICS.npz "
@@ -1303,7 +1380,7 @@ sbatch --mem 64G -J pCorr --wrap "module load use.own && module load pypack/deep
 sbatch --mem 64G -J pCorr --wrap "module load use.own && module load pypack/deeptools && plotCorrelation -in ESC_YAP1_S.npz --corMethod pearson --skipZeros --whatToPlot scatterplot --log1p -o ESC_YAP1_S_plotCorrelation.pdf "
 sbatch --mem 64G -J pCorr --wrap "module load use.own && module load pypack/deeptools && plotCorrelation -in ESC_YAP1_G2.npz --corMethod pearson --skipZeros --whatToPlot scatterplot --log1p -o ESC_YAP1_G2_plotCorrelation.pdf "
 ```
-## Inter Size Plot
+## Inter Size Plot mm39
 ```bash
 for f in *ICS*merged.sorted.bam; do
  sbatch --mem 8G --time=2:00:00 -J size --wrap "module load openjdk/1.8.0_60 && java -Xmx7g -jar /home/phunold/privatemodules/pypack/picard.jar CollectInsertSizeMetrics \
@@ -1319,7 +1396,7 @@ for f in *W300*merged.sorted.bam; do
       H=./${f%%}_size_histogram.pdf"
 done
 ```
-# Differential Binding Analysis
+# Differential Binding Analysis mm39
 ## Load Packages
 ```R
 library(edgeR)
