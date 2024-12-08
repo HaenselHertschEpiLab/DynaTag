@@ -847,17 +847,17 @@ done
 
 echo "FRiP scores have been saved to $output_file"
 ```
-## Calculate FRiP Scores mm10 GSM4291125_mESC_ChIPseq ---> still needs to be adjusted and run
+## Calculate FRiP Scores mm10 GSM4291125_mESC_ChIPseq
 ```bash
 nano FRiP_mm10_GSM4291125_mESC_ChIPseq.sh
-chmod -x FRiP_mm10_GSM4291125_mESC_ChIPseq.sh
-
+chmod +x FRiP_mm10_GSM4291125_mESC_ChIPseq.sh
+./FRiP_mm10_GSM4291125_mESC_ChIPseq.sh
 #!/bin/bash
 
 # Directories
 bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSM4291125_mESC_ChIPseq_bam"
-peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_GSM4291125_mESC_ChIPseq_bam"
-output_file="FRiP_scores_GSM4291125_mESC_ChIPseq.txt"
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/GSM4291125_mESC_ChIPseq_peaks"
+output_file="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/GSM4291125_mESC_ChIPseq_peaks/FRiP_scores_GSM4291125_mESC_ChIPseq.txt"
 
 # Activate the required environment
 conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
@@ -866,12 +866,12 @@ conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
 > "$output_file"
 
 # Process each BAM file
-for bam_file in "$bam_dir"/*_10000000_mm10_norm_clean.sort.bam; do
+for bam_file in "$bam_dir"/*_30000000_mm10_norm_clean.sort.bam; do
     # Extract the base name of the BAM file
-    base_name=$(basename "$bam_file" _10000000_mm10_norm_clean.sort.bam)
+    base_name=$(basename "$bam_file" _30000000_mm10_norm_clean.sort.bam)
 
     # Construct the corresponding peak file path
-    peaks_bed="$peak_dir/${base_name}_10000000_mm10_norm_clean.sort_peaks.narrowPeak_peaks_no.control.bed"
+    peaks_bed="$peak_dir/${base_name}_30000000_mm10_norm_clean.sort_peaks.narrowPeak_peaks.bed"
 
     # Check if the peak file exists
     if [ -f "$peaks_bed" ]; then
@@ -893,8 +893,52 @@ done
 
 echo "FRiP scores have been saved to $output_file"
 ```
+## Calculate FRiP Scores mm10 GSM4291125_mESC_ChIPseq_no.control
+```bash
+nano FRiP_mm10_GSM4291125_mESC_ChIPseq_no.control.sh
+chmod +x FRiP_mm10_GSM4291125_mESC_ChIPseq_no.control.sh
+./FRiP_mm10_GSM4291125_mESC_ChIPseq_no.control.sh
+#!/bin/bash
 
+# Directories
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSM4291125_mESC_ChIPseq_bam"
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/GSM4291125_mESC_ChIPseq_peaks_no_control"
+output_file="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/GSM4291125_mESC_ChIPseq_peaks_no_control/FRiP_mm10_GSM4291125_mESC_ChIPseq_no.control.txt"
 
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+# Initialize the output file
+> "$output_file"
+
+# Process each BAM file
+for bam_file in "$bam_dir"/*_30000000_mm10_norm_clean.sort.bam; do
+    # Extract the base name of the BAM file
+    base_name=$(basename "$bam_file" _30000000_mm10_norm_clean.sort.bam)
+
+    # Construct the corresponding peak file path
+    peaks_bed="$peak_dir/${base_name}_30000000_mm10_norm_clean.sort_peaks.narrowPeak_peaks_no.control.bed"
+
+    # Check if the peak file exists
+    if [ -f "$peaks_bed" ]; then
+        echo "Processing BAM file: $bam_file with Peaks: $peaks_bed"
+
+        # Calculate FRiP score as a fraction
+        bedtools intersect -abam "$bam_file" -b "$peaks_bed" -wa -u > overlapping_reads.bam
+        total_reads=$(samtools view -c -f 0x2 "$bam_file")
+        reads_in_peaks=$(samtools view -c -f 0x2 overlapping_reads.bam)
+        FRiP=$(bc -l <<< "$reads_in_peaks / $total_reads")
+        echo "Sample: $base_name - FRiP Score: $FRiP" >> "$output_file"
+
+        # Clean up temporary files
+        rm overlapping_reads.bam
+    else
+        echo "No matching peak file found for BAM file: $bam_file"
+    fi
+done
+
+echo "FRiP scores have been saved to $output_file"
+```
 ## Filter Consensus Peaks mm39
 ```bash
 module load bedtools/2.31.0
