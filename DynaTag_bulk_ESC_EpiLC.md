@@ -192,22 +192,25 @@ for f1 in *_bowtie2.sam; do
 sbatch -J StoB --mem 32GB --cpus-per-task 8 --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -bS -F 0x04 "$f1" > /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSM4291125_mESC_ChIPseq_bam/${f1%%}_bowtie2.mapped.bam"
 done
 ```
-## Sort and Remove duplicates files mm10 GSM4291125_mESC_ChIPseq --> needs to be executed
+## Sort and Remove duplicates files mm10 GSM4291125_mESC_ChIPseq
 #!/bin/bash
 
+# Directories
 input_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSM4291125_mESC_ChIPseq_bam"
 output_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSM4291125_mESC_ChIPseq_bam"
-mkdir -p "$output_dir"
 
 module load bio/SAMtools/1.19.2-GCC-13.2.0
 
 for bam_file in "$input_dir"/*.bam; do
     base_name=$(basename "$bam_file" .bam)
 
-    sbatch -J rmdup --mem=16GB --cpus-per-task=8 --wrap "
-    samtools sort -@ 8 -o temp_sorted.bam \"$bam_file\" && \
-    samtools markdup -r -@ 8 temp_sorted.bam \"$output_dir/${base_name}.rmdup.bam\" && \
-    rm temp_sorted.bam"
+    sbatch -J rmdup --mem=32GB --cpus-per-task=8 --wrap "
+    module load bio/SAMtools/1.19.2-GCC-13.2.0 && \
+    samtools sort -@ 8 -n \"$bam_file\" -o ${output_dir}/${base_name}_querysorted.bam && \
+    samtools fixmate -@ 8 -m ${output_dir}/${base_name}_querysorted.bam ${output_dir}/${base_name}_fixmate.bam && \
+    samtools sort -@ 8 ${output_dir}/${base_name}_fixmate.bam -o ${output_dir}/${base_name}_coordsorted.bam && \
+    samtools markdup -@ 8 -r ${output_dir}/${base_name}_coordsorted.bam ${output_dir}/${base_name}_rmdup.bam && \
+    rm ${output_dir}/${base_name}_querysorted.bam ${output_dir}/${base_name}_fixmate.bam ${output_dir}/${base_name}_coordsorted.bam"
 done
 ```
 ## Downsampling mm39
@@ -370,25 +373,18 @@ for file in *.bam; do
     "
 done
 ```
-## Downsampling mm10 GSM4291125_mESC_ChIPseq --> code ready but not executed
+## Downsampling mm10 GSM4291125_mESC_ChIPseq
 ```bash
 #!/bin/bash
 
 # Step 1: Count reads in BAM files
 echo "Step 1: Counting reads in BAM files..."
-num_bam_files=$(ls -1 *.bam | wc -l)
-for f1 in *.bam; do
+num_bam_files=$(ls -1 *rmdup.bam | wc -l)
+for f1 in *rmdup.bam; do
     if [[ ! -f "${f1%%.bam}.stat5" ]]; then
         sbatch --mem 8G -J reads --mail-type=FAIL --mail-user=rhaensel@uni-koeln.de --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -c -F 260 $f1 > ${f1%%.bam}.stat5"
     fi
 done
-
-# Wait until all .stat5 files are generated
-echo "Waiting for read count jobs to complete..."
-while [ $(ls -1 *.stat5 2>/dev/null | wc -l) -lt $num_bam_files ]; do
-    sleep 60
-done
-echo "Finished counting reads."
 
 # Step 2: Combine results
 echo "Step 2: Combining results..."
@@ -400,7 +396,7 @@ echo "Finished combining results."
 
 # Step 3: Downsample BAM files
 echo "Step 3: Downsampling BAM files..."
-for file in *.bam; do
+for file in *rmdup.bam; do
     # Determine desired reads based on file name
     if [[ "$file" == *"SRR"* ]]; then
         desired_reads=30000000
@@ -409,7 +405,7 @@ for file in *.bam; do
     fi
 
     # Extract base name (adjust according to your file naming convention)
-    base_name="${file%_bowtie2.mapped.bam}"
+    base_name="${file%_bowtie2.mapped_rmdup.bam}"
 
     # Submit sbatch job
     sbatch --mem 8G --cpus-per-task 8 --wrap "
@@ -425,12 +421,21 @@ for file in *.bam; do
     fi
     "
 done
-```
-## Sort BAM files mm39
-```bash
-for f in *down_bowtie2.mapped.bam; do
- sbatch --mem 8G -J samSort --cpus-per-task 8 --wrap "module load samtools/1.13 && samtools sort -@ 8 $f > ${f%%.bam}.sort.bam"
+# Step 4: Count reads in downsampled BAM files
+echo "Step 4: Counting reads in downsampled BAM files..."
+num_bam_files=$(ls -1 *_30000000_mm10_norm_clean.bam | wc -l)
+for f1 in *_30000000_mm10_norm_clean.bam; do
+    if [[ ! -f "${f1%%.bam}.stat5" ]]; then
+        sbatch --mem 8G -J reads --mail-type=FAIL --mail-user=rhaensel@uni-koeln.de --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -c -F 260 $f1 > ${f1%%.bam}.stat5"
+    fi
 done
+# Step 5: Combine results
+echo "Step 5: Combining results..."
+if [[ -f reads_downsampled.txt ]]; then
+    rm reads_downsampled.txt  # Remove existing reads.txt to avoid appending duplicates
+fi
+cat *_clean.stat5 > reads_downsampled.txt
+echo "Finished combining results."
 ```
 ## Sort BAM files mm39
 ```bash
@@ -459,20 +464,17 @@ rename 'SRR23310250' 'SRR23310250_NANOG_CUTnRUN_2i' *
 rename 'SRR23310254' 'SRR23310254_IgG_CUTnRUN_SL' *
 rename 'SRR23310255' 'SRR23310255_IgG_CUTnRUN_2i' *
 ```
-## Sort BAM files mm10 GSM4291125_mESC_ChIPseq --> code ready but not executed
+## Sort and rename BAM files mm10 GSM4291125_mESC_ChIPseq
 ```bash
 for f in *clean.bam; do
  sbatch --mem 8G -J samSort --cpus-per-task 8 --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools sort -@ 8 $f > ${f%%.bam}.sort.bam"
 done
 rename 'bowtie2.sam_' '' *_bowtie2.sam_*
-rename 'SRR23310225' 'SRR23310225_SOX2_CUTnRUN_SL' *
-rename 'SRR23310227' 'SRR23310227_SOX2_CUTnRUN_2i' *
-rename 'SRR23310247' 'SRR23310247_OCT4_CUTnRUN_SL' *
-rename 'SRR23310248' 'SRR23310248_OCT4_CUTnRUN_2i' *
-rename 'SRR23310249' 'SRR23310249_NANOG_CUTnRUN_SL' *
-rename 'SRR23310250' 'SRR23310250_NANOG_CUTnRUN_2i' *
-rename 'SRR23310254' 'SRR23310254_IgG_CUTnRUN_SL' *
-rename 'SRR23310255' 'SRR23310255_IgG_CUTnRUN_2i' *
+rename 'SRR10992264' 'SRR10992264_WT_input_ChIPseq' *
+rename 'SRR10992265' 'SRR10992265_NANOG_ChIPseq' *
+rename 'SRR10992266' 'SRR10992266_OCT4_ChIPseq' *
+rename 'SRR10992267' 'SRR10992267_SOX2_ChIPseq' *
+rename 'SRR10992268' 'SRR10992268_YAP1_ChIPseq' *
 ```
 ## Call Peaks with MACS2 mm39
 ```bash
@@ -545,7 +547,7 @@ done
    8397 SRR23310249_NANOG_CUTnRUN_SL_10000000_mm10_norm_clean.sort_peaks.narrowPeak
   19361 SRR23310250_NANOG_CUTnRUN_2i_10000000_mm10_norm_clean.sort_peaks.narrowPeak
 
-# perform peak callign as exactly as dine for DynaTag, don't consider IgG controls
+# perform peak callign as exactly as done for DynaTag, don't consider IgG controls
 nano run_macs2_callpeak_no_control.sh
 
 #!/bin/bash
@@ -590,7 +592,96 @@ for f in *_peaks.narrowPeak; do
   awk '{print $1"\t"$2"\t"$3}' "$f" | sortBed -i - | mergeBed -i - > "${base_name}_peaks_no.control.bed"
 done
 ```
+## Call Peaks with MACS2 mm10 GSM4291125_mESC_ChIPseq
+```bash
+#create script that considers matched Input control as -c during peak calling 
+nano run_macs2_with_control.sh
+chmod +x run_macs2_with_control.sh
+./run_macs2_with_control.sh
 
+
+#!/bin/bash
+
+# Define the input control BAM file (used for all treatment files)
+control_bam="SRR10992264_WT_input_ChIPseq_30000000_mm10_norm_clean.sort.bam"
+
+# Directory to store peak results
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/GSM4291125_mESC_ChIPseq_peaks"
+
+# Create the output directory if it does not exist
+mkdir -p "$peak_dir"
+
+# Loop over all treatment files and run MACS2 with the control
+for t_file in *_30000000_mm10_norm_clean.sort.bam; do
+    # Skip the control file
+    if [ "$(basename "$t_file")" == "$control_bam" ]; then
+        continue
+    fi
+
+    # Construct the output prefix
+    output_prefix="$peak_dir/$(basename "$t_file" .bam)"
+
+    # Submit the SLURM job
+    sbatch -J MACS2 --mem 32GB --cpus-per-task=8 --wrap "
+    conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && \
+    macs2 callpeak -t $t_file -c $control_bam -f BAMPE -g mm --keep-dup all -n $output_prefix --nomodel --extsize 55 -B --SPMR"
+done
+
+(/home/rhaensel/intervene_env) [rhaensel@ramses1 GSM4291125_mESC_ChIPseq_bam]$ wc -l ../../../peaks/GSM4291125_mESC_ChIPseq_peaks/*narrowPeak
+   66848 ../../../peaks/GSM4291125_mESC_ChIPseq_peaks/SRR10992265_NANOG_ChIPseq_30000000_mm10_norm_clean.sort_peaks.narrowPeak
+   30512 ../../../peaks/GSM4291125_mESC_ChIPseq_peaks/SRR10992266_OCT4_ChIPseq_30000000_mm10_norm_clean.sort_peaks.narrowPeak
+    5325 ../../../peaks/GSM4291125_mESC_ChIPseq_peaks/SRR10992267_SOX2_ChIPseq_30000000_mm10_norm_clean.sort_peaks.narrowPeak
+    1686 ../../../peaks/GSM4291125_mESC_ChIPseq_peaks/SRR10992268_YAP1_ChIPseq_30000000_mm10_norm_clean.sort_peaks.narrowPeak
+
+# perform peak calling as exactly as done for DynaTag, don't consider Input
+nano run_macs2_no_control.sh
+chmod +x run_macs2_no_control.sh
+./run_macs2_no_control.sh
+
+#!/bin/bash
+
+# Define the input control BAM file to exclude
+control_bam="SRR10992264_WT_input_ChIPseq_30000000_mm10_norm_clean.sort.bam"
+
+# Directory to store peak results
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/GSM4291125_mESC_ChIPseq_peaks_no_control"
+
+# Create the output directory if it does not exist
+mkdir -p "$peak_dir"
+
+# Loop over all treatment files and run MACS2
+for t_file in *_30000000_mm10_norm_clean.sort.bam; do
+    # Skip the control file
+    if [ "$(basename "$t_file")" == "$control_bam" ]; then
+        continue
+    fi
+
+    # Construct the output prefix
+    output_prefix="$peak_dir/$(basename "$t_file" .bam)"
+
+    # Submit the SLURM job
+    sbatch -J MACS2 --mem 32GB --cpus-per-task=8 --wrap "
+    conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && \
+    macs2 callpeak -t $t_file -f BAMPE -g mm --keep-dup all -n $output_prefix --nomodel --extsize 55 -B --SPMR"
+done
+
+(/home/rhaensel/intervene_env) [rhaensel@ramses1 GSM4291125_mESC_ChIPseq_bam]$ wc -l ../../../peaks/GSM4291125_mESC_ChIPseq_peaks_no_control/*narrowPeak
+   73031 ../../../peaks/GSM4291125_mESC_ChIPseq_peaks_no_control/SRR10992265_NANOG_ChIPseq_30000000_mm10_norm_clean.sort_peaks.narrowPeak
+   37897 ../../../peaks/GSM4291125_mESC_ChIPseq_peaks_no_control/SRR10992266_OCT4_ChIPseq_30000000_mm10_norm_clean.sort_peaks.narrowPeak
+    8345 ../../../peaks/GSM4291125_mESC_ChIPseq_peaks_no_control/SRR10992267_SOX2_ChIPseq_30000000_mm10_norm_clean.sort_peaks.narrowPeak
+    3573 ../../../peaks/GSM4291125_mESC_ChIPseq_peaks_no_control/SRR10992268_YAP1_ChIPseq_30000000_mm10_norm_clean.sort_peaks.narrowPeak
+
+cd /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/GSM4291125_mESC_ChIPseq_peaks
+for f in *_peaks.narrowPeak; do
+  base_name=$(basename "$f" ".sorted.bam_peaks.narrowPeak")
+  awk '{print $1"\t"$2"\t"$3}' "$f" | sortBed -i - | mergeBed -i - > "${base_name}_peaks.bed"
+done
+cd /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/GSM4291125_mESC_ChIPseq_peaks_no_control
+for f in *_peaks.narrowPeak; do
+  base_name=$(basename "$f" ".sorted.bam_peaks.narrowPeak")
+  awk '{print $1"\t"$2"\t"$3}' "$f" | sortBed -i - | mergeBed -i - > "${base_name}_peaks_no.control.bed"
+done
+```
 ## Calculate FRiP Scores mm39
 ```bash
 #!/bin/bash
@@ -721,6 +812,52 @@ nano FRiP_mm10_GSE224292_mESC_CUTnRUN_no_control.sh
 bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSE224292_mESC_CUTnRUN_bam"
 peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_GSE224292_mESC_CUTnRUN_no.control"
 output_file="FRiP_scores_no_control.txt"
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+# Initialize the output file
+> "$output_file"
+
+# Process each BAM file
+for bam_file in "$bam_dir"/*_10000000_mm10_norm_clean.sort.bam; do
+    # Extract the base name of the BAM file
+    base_name=$(basename "$bam_file" _10000000_mm10_norm_clean.sort.bam)
+
+    # Construct the corresponding peak file path
+    peaks_bed="$peak_dir/${base_name}_10000000_mm10_norm_clean.sort_peaks.narrowPeak_peaks_no.control.bed"
+
+    # Check if the peak file exists
+    if [ -f "$peaks_bed" ]; then
+        echo "Processing BAM file: $bam_file with Peaks: $peaks_bed"
+
+        # Calculate FRiP score as a fraction
+        bedtools intersect -abam "$bam_file" -b "$peaks_bed" -wa -u > overlapping_reads.bam
+        total_reads=$(samtools view -c -f 0x2 "$bam_file")
+        reads_in_peaks=$(samtools view -c -f 0x2 overlapping_reads.bam)
+        FRiP=$(bc -l <<< "$reads_in_peaks / $total_reads")
+        echo "Sample: $base_name - FRiP Score: $FRiP" >> "$output_file"
+
+        # Clean up temporary files
+        rm overlapping_reads.bam
+    else
+        echo "No matching peak file found for BAM file: $bam_file"
+    fi
+done
+
+echo "FRiP scores have been saved to $output_file"
+```
+## Calculate FRiP Scores mm10 GSM4291125_mESC_ChIPseq ---> still needs to be adjusted and run
+```bash
+nano FRiP_mm10_GSM4291125_mESC_ChIPseq.sh
+chmod -x FRiP_mm10_GSM4291125_mESC_ChIPseq.sh
+
+#!/bin/bash
+
+# Directories
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSM4291125_mESC_ChIPseq_bam"
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_GSM4291125_mESC_ChIPseq_bam"
+output_file="FRiP_scores_GSM4291125_mESC_ChIPseq.txt"
 
 # Activate the required environment
 conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
