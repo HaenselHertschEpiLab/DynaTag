@@ -1925,13 +1925,43 @@ gg
 # Save the plot as a PDF
 ggsave(filename = paste0("/Users/pascalhunold/Desktop/PhD_Documentation/DynaTag/Sequencing/ESC_EpiLC/figures/", TF, "_ChIPAtlas_enrichment.pdf"), plot = gg)
 ```
-# MEME-ChIP
+# MEME-ChIP mm39
 ## Generate fasta Files
 ```bash
 module load bedtools/2.29.2
 
 for f in *.over59nt.sorted.bed; do
 sbatch --mem 8G --time=2:00:00 -J FA --wrap "module load bedtools/2.31.0 && bedtools getfasta -fi /projects/ag-haensel/Pascal/genome_files/mm39_bowtie/Mus_musculus.GRCm39.dna.primary_assembly.fa -bed $f -fo ./${f%.conservedPeaks_MACS2_real.bed}.fasta"
+done
+```
+## Generate fasta Files mm10
+```bash
+for f in *master_peaks.bed; do
+sbatch --mem 8G --time=2:00:00 -J FA --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && bedtools getfasta -fi /projects/ag-haensel/Pascal/genome_files/mm10_bowtie/mm10.fa -bed $f -fo ./${f%.bed}.mm10.fasta"
+done
+```
+## Generate fasta Files mm10 peaks_GSE224292_mESC_CUTnRUN
+```bash
+for f in *_peaks.bed; do
+sbatch --mem 8G --time=2:00:00 -J FA --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && bedtools getfasta -fi /projects/ag-haensel/Pascal/genome_files/mm10_bowtie/mm10.fa -bed $f -fo ./${f%.bed}.mm10.fasta"
+done
+```
+## Generate fasta Files mm10 peaks_GSE224292_mESC_CUTnRUN_no.control
+```bash
+for f in *peaks_no.control.bed; do
+sbatch --mem 8G --time=2:00:00 -J FA --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && bedtools getfasta -fi /projects/ag-haensel/Pascal/genome_files/mm10_bowtie/mm10.fa -bed $f -fo ./${f%.bed}.mm10.fasta"
+done
+```
+## Generate fasta Files mm10 GSM4291125_mESC_ChIPseq_peaks
+```bash
+for f in *_peaks.bed; do
+sbatch --mem 8G --time=2:00:00 -J FA --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && bedtools getfasta -fi /projects/ag-haensel/Pascal/genome_files/mm10_bowtie/mm10.fa -bed $f -fo ./${f%.bed}.mm10.fasta"
+done
+```
+## Generate fasta Files mm10 GSM4291125_mESC_ChIPseq_peaks_no_control
+```bash
+for f in *_peaks_no.control.bed; do
+sbatch --mem 8G --time=2:00:00 -J FA --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && bedtools getfasta -fi /projects/ag-haensel/Pascal/genome_files/mm10_bowtie/mm10.fa -bed $f -fo ./${f%.bed}.mm10.fasta"
 done
 ```
 # TOBIAS Analysis
