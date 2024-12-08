@@ -186,15 +186,28 @@ for f1 in *_bowtie2.sam; do
 sbatch -J StoB --mem 32GB --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -bS -F 0x04 "$f1" > /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSE224292_mESC_CUTnRUN_bam/${f1%%}_bowtie2.mapped.bam"
 done
 ```
-## Generate BAM files mm10 GSM4291125_mESC_ChIPseq ---> still needs to be done
+## Generate BAM files mm10 GSM4291125_mESC_ChIPseq
 ```bash
 for f1 in *_bowtie2.sam; do
-sbatch -J StoB --mem 32GB --wrap "
-module load bio/SAMtools/1.19.2-GCC-13.2.0 && \
-samtools view -bS -F 0x04 \"$f1\" > temp.bam && \
-samtools sort temp.bam -o temp_sorted.bam && \
-samtools markdup -r temp_sorted.bam /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSM4291125_mESC_ChIPseq_bam/${f1%%}_bowtie2.mapped.rmdup.bam && \
-rm temp.bam temp_sorted.bam"
+sbatch -J StoB --mem 32GB --cpus-per-task 8 --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -bS -F 0x04 "$f1" > /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSM4291125_mESC_ChIPseq_bam/${f1%%}_bowtie2.mapped.bam"
+done
+```
+## Sort and Remove duplicates files mm10 GSM4291125_mESC_ChIPseq --> needs to be executed
+#!/bin/bash
+
+input_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSM4291125_mESC_ChIPseq_bam"
+output_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/GSM4291125_mESC_ChIPseq_bam"
+mkdir -p "$output_dir"
+
+module load bio/SAMtools/1.19.2-GCC-13.2.0
+
+for bam_file in "$input_dir"/*.bam; do
+    base_name=$(basename "$bam_file" .bam)
+
+    sbatch -J rmdup --mem=16GB --cpus-per-task=8 --wrap "
+    samtools sort -@ 8 -o temp_sorted.bam \"$bam_file\" && \
+    samtools markdup -r -@ 8 temp_sorted.bam \"$output_dir/${base_name}.rmdup.bam\" && \
+    rm temp_sorted.bam"
 done
 ```
 ## Downsampling mm39
@@ -356,6 +369,69 @@ for file in *.bam; do
     fi
     "
 done
+```
+## Downsampling mm10 GSM4291125_mESC_ChIPseq --> code ready but not executed
+```bash
+#!/bin/bash
+
+# Step 1: Count reads in BAM files
+echo "Step 1: Counting reads in BAM files..."
+num_bam_files=$(ls -1 *.bam | wc -l)
+for f1 in *.bam; do
+    if [[ ! -f "${f1%%.bam}.stat5" ]]; then
+        sbatch --mem 8G -J reads --mail-type=FAIL --mail-user=rhaensel@uni-koeln.de --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools view -c -F 260 $f1 > ${f1%%.bam}.stat5"
+    fi
+done
+
+# Wait until all .stat5 files are generated
+echo "Waiting for read count jobs to complete..."
+while [ $(ls -1 *.stat5 2>/dev/null | wc -l) -lt $num_bam_files ]; do
+    sleep 60
+done
+echo "Finished counting reads."
+
+# Step 2: Combine results
+echo "Step 2: Combining results..."
+if [[ -f reads.txt ]]; then
+    rm reads.txt  # Remove existing reads.txt to avoid appending duplicates
+fi
+cat *.stat5 > reads.txt
+echo "Finished combining results."
+
+# Step 3: Downsample BAM files
+echo "Step 3: Downsampling BAM files..."
+for file in *.bam; do
+    # Determine desired reads based on file name
+    if [[ "$file" == *"SRR"* ]]; then
+        desired_reads=30000000
+   else
+        desired_reads=30000000  # Default desired reads
+    fi
+
+    # Extract base name (adjust according to your file naming convention)
+    base_name="${file%_bowtie2.mapped.bam}"
+
+    # Submit sbatch job
+    sbatch --mem 8G --cpus-per-task 8 --wrap "
+    module load bio/SAMtools/1.19.2-GCC-13.2.0
+    total_reads=\$(samtools view -@ 8 -c -F 260 \"$file\")
+    if [[ \$total_reads -ge $desired_reads ]]; then
+        scaling_factor=\$(bc <<< \"scale=4; $desired_reads / \$total_reads\")
+        output_file=\"${base_name}_${desired_reads}_mm10_norm_clean.bam\"
+        samtools view -@ 8 -bs \"\$scaling_factor\" \"$file\" > \"\$output_file\"
+    else
+        output_file=\"${base_name}_\${total_reads}_mm10_same_clean.bam\"
+        cp \"$file\" \"\$output_file\"
+    fi
+    "
+done
+```
+## Sort BAM files mm39
+```bash
+for f in *down_bowtie2.mapped.bam; do
+ sbatch --mem 8G -J samSort --cpus-per-task 8 --wrap "module load samtools/1.13 && samtools sort -@ 8 $f > ${f%%.bam}.sort.bam"
+done
+```
 ## Sort BAM files mm39
 ```bash
 for f in *down_bowtie2.mapped.bam; do
@@ -369,6 +445,21 @@ for f in *clean.bam; do
 done
 ```
 ## Sort BAM files mm10 GSE224292_mESC_CUTnRUN
+```bash
+for f in *clean.bam; do
+ sbatch --mem 8G -J samSort --cpus-per-task 8 --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools sort -@ 8 $f > ${f%%.bam}.sort.bam"
+done
+rename 'bowtie2.sam_' '' *_bowtie2.sam_*
+rename 'SRR23310225' 'SRR23310225_SOX2_CUTnRUN_SL' *
+rename 'SRR23310227' 'SRR23310227_SOX2_CUTnRUN_2i' *
+rename 'SRR23310247' 'SRR23310247_OCT4_CUTnRUN_SL' *
+rename 'SRR23310248' 'SRR23310248_OCT4_CUTnRUN_2i' *
+rename 'SRR23310249' 'SRR23310249_NANOG_CUTnRUN_SL' *
+rename 'SRR23310250' 'SRR23310250_NANOG_CUTnRUN_2i' *
+rename 'SRR23310254' 'SRR23310254_IgG_CUTnRUN_SL' *
+rename 'SRR23310255' 'SRR23310255_IgG_CUTnRUN_2i' *
+```
+## Sort BAM files mm10 GSM4291125_mESC_ChIPseq --> code ready but not executed
 ```bash
 for f in *clean.bam; do
  sbatch --mem 8G -J samSort --cpus-per-task 8 --wrap "module load bio/SAMtools/1.19.2-GCC-13.2.0 && samtools sort -@ 8 $f > ${f%%.bam}.sort.bam"
