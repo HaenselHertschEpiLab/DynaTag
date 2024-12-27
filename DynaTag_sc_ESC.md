@@ -17,6 +17,59 @@ module load module load bcl2fastq/2.20.0_rh7
                      --run=/scratch/phunold/20231231_icell8cx_ESC \
                      --csv=/scratch/phunold/20231231_icell8cx_ESC/SampleSheet_UDP.csv
 ```
+## RHH Demultiplex BCL into fastq
+```bash
+head SampleSheet_UDP_RHH.csv
+
+[Header],,
+FileFormatVersion,2,
+RunName,PH_20231231_snDynaTag_ICELL8CX_ESC_UDP,
+InstrumentPlatform,NextSeq1k2k,
+IndexOrientation,Forward,
+,,
+[Reads],,
+Read1Cycles,50,
+Read2Cycles,50,
+Index1Cycles,10,
+Index2Cycles,10,
+,,
+[Settings]
+SoftwareVersion,3.10.4,
+NoLaneSplitting,true,
+OverrideCycles,Y50;I10;I10;Y50,
+FastqCompressionFormat,gzip,
+BarcodeMismatchesIndex1,1,
+BarcodeMismatchesIndex2,1,
+,,
+[Data]
+Sample_ID,Index,Index2
+R0C2_OCT4_ESC,GACTGAGTAG,CGCTCCACGA,
+R0C22_OCT4_ESC,ACCGGCCGTA,CGCTCCACGA,
+R0C24_OCT4_ESC,CTGCGAGCCA,CGCTCCACGA,
+#... --> Lines are missing, for each cell that was evaluated as single nucleus by the ICELL8 software, a unique line #in the sample sheet was created indicating the Well poition (RXCX) and transcripton factor targeted. 
+
+cat demultiplex.sh
+
+#!/bin/bash
+#SBATCH --time=9:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32gb
+#SBATCH --mail-type=END
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+
+# Load necessary module
+module load bio/bcl2fastq2/2.20.0-GCC-12.2.0
+
+# Define paths for Cell Ranger and inputs
+CELLRANGER=/projects/ag-haensel/tools/cellranger-7.0.1/bin/cellranger
+RUN_DIR=/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/Pascal_snDynaTag/snDynaTag_ICELL8cx_BCL
+CSV_FILE=${RUN_DIR}/SampleSheet_UDP_RHH.csv
+
+# Run Cell Ranger mkfastq
+$CELLRANGER mkfastq --id=20231231_icell8cx_ESC \
+                    --run=$RUN_DIR \
+                    --csv=$CSV_FILE
+```
 ## Trim fastq files
 ```bash
 mkdir TRIMMED_DIR
@@ -31,6 +84,33 @@ FASTQ_DIR="/scratch/phunold/20231231_icell8cx_ESC/20231231_icell8cx_ESC/outs/fas
 # Directory to store trimmed FASTQ files
 TRIMMED_DIR="/scratch/phunold/20231231_icell8cx_ESC/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR"
 module load use.own && module load pypack/cutadapt
+# Loop through all R1 FASTQ files
+for f1 in $FASTQ_DIR/*_R1_001.fastq.gz; do
+    # Corresponding R2 file
+    f2=$(echo $f1 | sed 's/_R1_001.fastq.gz/_R2_001.fastq.gz/')
+    # Extract the basename for naming
+    base_name=$(basename $f1 _R1_001.fastq.gz)
+    # Run cutadapt directly
+    cutadapt -a CTGTCTCTTATACACATCT -A CTGTCTCTTATACACATCT -m 15 -q 20 \
+             -o $TRIMMED_DIR/${base_name}_R1_001.trimmed.fastq.gz \
+             -p $TRIMMED_DIR/${base_name}_R2_001.trimmed.fastq.gz \
+             $f1 $f2
+done
+```
+## Trim fastq files RHH 27122024
+```bash
+mkdir TRIMMED_DIR
+
+nano trimm_fastq.sh
+
+#!/bin/bash
+    #SBATCH --time=6:00:00
+    #SBATCH --mem=8gb
+# Directory containing the FASTQ files
+FASTQ_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path"
+# Directory to store trimmed FASTQ files
+TRIMMED_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR"
+module load bio/cutadapt/4.4-GCCcore-12.2.0
 # Loop through all R1 FASTQ files
 for f1 in $FASTQ_DIR/*_R1_001.fastq.gz; do
     # Corresponding R2 file
