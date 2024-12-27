@@ -124,9 +124,12 @@ for f1 in $FASTQ_DIR/*_R1_001.fastq.gz; do
              $f1 $f2
 done
 ```
-## Alignment mm39
+## Alignment RHH mm39
 ```bash
-mkdir /alignment/sam
+mkdir /alignment/sam_mm39
+mkdir /alignment/bam_mm39
+
+nano alignment_mm39.sh
 
 #!/bin/bash
 #SBATCH --time=24:00:00
@@ -139,7 +142,7 @@ FASTQ_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8
 # Directory to store sam files
 SAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/sam"
 module load bowtie2/2.4.1
-ref='/projects/ag-haensel/Pascal/genome_files/mm10_bowtie/ref/ref'
+ref='/projects/ag-haensel/Pascal/genome_files/mm39_bowtie/ref/ref'
 # Loop through all R1 FASTQ files
 for f1 in $FASTQ_DIR/*_R1_001.trimmed.fastq.gz; do
     # Corresponding R2 file
@@ -149,19 +152,16 @@ for f1 in $FASTQ_DIR/*_R1_001.trimmed.fastq.gz; do
     bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -p 16 -I 10 -X 700 -x "$ref" -1 "$f1" -2 "$f2" -S "$SAM_DIR/${base_name}_bowtie2.sam"
 done
 ```
-## Alignment RHH mm39
+## Alignment
 ```bash
 mkdir /alignment/sam
-mkdir /alignment/bam
-
-nano alignment_mm39.sh
 
 #!/bin/bash
 #SBATCH --time=24:00:00
 #SBATCH --mem=44gb
 #SBATCH --cpus-per-task=16
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=rhaensel@uni-koeln.de
+#SBATCH --mail-user=phunold@uni-koeln.de
 # Directory containing the trimmed FASTQ files
 FASTQ_DIR="/scratch/phunold/20231231_icell8cx_ESC/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR"
 # Directory to store sam files
