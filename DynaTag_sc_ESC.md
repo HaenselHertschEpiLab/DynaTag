@@ -225,6 +225,54 @@ for f1 in in $SAM_DIR/*_bowtie2.sam; do
     samtools view -bS -F 0x04 "$f1" > "$BAM_DIR/${base_name}_bowtie2.mapped.bam"
 done
 ```
+## Generate BAM files RHH mm39
+```bash
+mkdir alignment/bam_mm39
+
+nano sam_mm39.to.bam_mm39.sh
+
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --mem=44gb
+#SBATCH --cpus-per-task=16
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+# Directory containing the trimmed FASTQ files
+SAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/sam_mm39"
+# Directory to store sam files
+BAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/bam_mm39"
+module load bio/SAMtools/1.19.2-GCC-13.2.0
+# Loop through all R1 FASTQ files
+for f1 in in $SAM_DIR/*_bowtie2.sam; do
+    # Define base_name based on f1
+    base_name=$(basename "$f1" _bowtie2.sam)
+    samtools view -bS -F 0x04 "$f1" > "$BAM_DIR/${base_name}_bowtie2.mapped.bam"
+done
+```
+## Generate BAM files RHH mm10
+```bash
+mkdir alignment/bam_mm10
+
+nano sam_mm10.to.bam_mm10.sh
+
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --mem=44gb
+#SBATCH --cpus-per-task=16
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+# Directory containing the trimmed FASTQ files
+SAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/sam_mm10"
+# Directory to store sam files
+BAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/bam_mm10"
+module load bio/SAMtools/1.19.2-GCC-13.2.0
+# Loop through all R1 FASTQ files
+for f1 in in $SAM_DIR/*_bowtie2.sam; do
+    # Define base_name based on f1
+    base_name=$(basename "$f1" _bowtie2.sam)
+    samtools view -bS -F 0x04 "$f1" > "$BAM_DIR/${base_name}_bowtie2.mapped.bam"
+done
+```
 ## Merge single-cell BAM files into aggregated BAM file
 ```bash
 ## adjust row and col parameters according to sample coordinates on ICELL8 chip
@@ -268,6 +316,152 @@ done
 module load samtools/1.13
 samtools merge -@ 8 $OUTPUT_FILE "${bam_files_to_merge[@]}"
 ```
+## Merge single-cell BAM files into aggregated BAM file RHH mm39
+```bash
+nano aggregated_bam_mm39.sh
+
+#!/bin/bash
+#SBATCH --time=02:00:00
+#SBATCH --mem=16gb
+#SBATCH --cpus-per-task=8
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+
+# Directory containing BAM files
+BAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/bam_mm39"
+
+# Output directory for merged BAM files
+OUTPUT_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/aggregated_bam_mm39"
+mkdir -p "$OUTPUT_DIR"
+
+# Transcription factors to process
+TRANSCRIPTION_FACTORS=("NANOG" "MYC" "OCT4" "YAP1")
+
+# Load samtools module
+module load bio/SAMtools/1.19.2-GCC-13.2.0
+
+# Log file for debugging
+LOG_FILE="${OUTPUT_DIR}/merge_log.txt"
+echo "Starting BAM file merge at $(date)" > "$LOG_FILE"
+
+# Iterate over transcription factors
+for TF in "${TRANSCRIPTION_FACTORS[@]}"; do
+    # Create output file name for the current TF
+    OUTPUT_FILE="${OUTPUT_DIR}/merged_sample_${TF}_mm39.bam"
+
+    # Find all BAM files matching the transcription factor name
+    bam_files_to_merge=("${BAM_DIR}"/R*C*_"${TF}"_*_bowtie2.mapped.bam)
+
+    # Check if there are files to merge
+    if [ ${#bam_files_to_merge[@]} -eq 0 ]; then
+        echo "No BAM files found for transcription factor: $TF. Skipping." >> "$LOG_FILE"
+        continue
+    fi
+
+    # Log the files to be merged
+    echo "Merging ${#bam_files_to_merge[@]} files for $TF:" >> "$LOG_FILE"
+    printf "%s\n" "${bam_files_to_merge[@]}" >> "$LOG_FILE"
+
+    # Perform the merge
+    samtools merge -@ 8 "$OUTPUT_FILE" "${bam_files_to_merge[@]}"
+
+    # Check if the merge was successful
+    if [ $? -eq 0 ]; then
+        echo "Successfully merged BAM files for $TF into $OUTPUT_FILE" >> "$LOG_FILE"
+
+        # Sort the merged BAM file
+        SORTED_OUTPUT_FILE="${OUTPUT_DIR}/merged_sample_${TF}_mm39.sorted.bam"
+        samtools sort -@ 8 -o "$SORTED_OUTPUT_FILE" "$OUTPUT_FILE"
+
+        # Check if sorting was successful
+        if [ $? -eq 0 ]; then
+            echo "Successfully sorted merged BAM file for $TF into $SORTED_OUTPUT_FILE" >> "$LOG_FILE"
+            # Remove the unsorted file to save space (optional)
+            rm "$OUTPUT_FILE"
+        else
+            echo "Error sorting BAM file for $TF. Check samtools output." >> "$LOG_FILE"
+        fi
+    else
+        echo "Error merging BAM files for $TF. Check samtools output." >> "$LOG_FILE"
+    fi
+
+done
+
+echo "BAM file merging completed at $(date)" >> "$LOG_FILE"
+```
+## Merge single-cell BAM files into aggregated BAM file RHH mm10
+```bash
+nano aggregated_bam_mm10.sh
+
+#!/bin/bash
+#SBATCH --time=02:00:00
+#SBATCH --mem=16gb
+#SBATCH --cpus-per-task=8
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+
+# Directory containing BAM files
+BAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/bam_mm10"
+
+# Output directory for merged BAM files
+OUTPUT_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/aggregated_bam_mm10"
+mkdir -p "$OUTPUT_DIR"
+
+# Transcription factors to process
+TRANSCRIPTION_FACTORS=("NANOG" "MYC" "OCT4" "YAP1")
+
+# Load samtools module
+module load bio/SAMtools/1.19.2-GCC-13.2.0
+
+# Log file for debugging
+LOG_FILE="${OUTPUT_DIR}/merge_log.txt"
+echo "Starting BAM file merge at $(date)" > "$LOG_FILE"
+
+# Iterate over transcription factors
+for TF in "${TRANSCRIPTION_FACTORS[@]}"; do
+    # Create output file name for the current TF
+    OUTPUT_FILE="${OUTPUT_DIR}/merged_sample_${TF}_mm10.bam"
+
+    # Find all BAM files matching the transcription factor name
+    bam_files_to_merge=("${BAM_DIR}"/R*C*_"${TF}"_*_bowtie2.mapped.bam)
+
+    # Check if there are files to merge
+    if [ ${#bam_files_to_merge[@]} -eq 0 ]; then
+        echo "No BAM files found for transcription factor: $TF. Skipping." >> "$LOG_FILE"
+        continue
+    fi
+
+    # Log the files to be merged
+    echo "Merging ${#bam_files_to_merge[@]} files for $TF:" >> "$LOG_FILE"
+    printf "%s\n" "${bam_files_to_merge[@]}" >> "$LOG_FILE"
+
+    # Perform the merge
+    samtools merge -@ 8 "$OUTPUT_FILE" "${bam_files_to_merge[@]}"
+
+    # Check if the merge was successful
+    if [ $? -eq 0 ]; then
+        echo "Successfully merged BAM files for $TF into $OUTPUT_FILE" >> "$LOG_FILE"
+
+        # Sort the merged BAM file
+        SORTED_OUTPUT_FILE="${OUTPUT_DIR}/merged_sample_${TF}_mm10.sorted.bam"
+        samtools sort -@ 8 -o "$SORTED_OUTPUT_FILE" "$OUTPUT_FILE"
+
+        # Check if sorting was successful
+        if [ $? -eq 0 ]; then
+            echo "Successfully sorted merged BAM file for $TF into $SORTED_OUTPUT_FILE" >> "$LOG_FILE"
+            # Remove the unsorted file to save space (optional)
+            rm "$OUTPUT_FILE"
+        else
+            echo "Error sorting BAM file for $TF. Check samtools output." >> "$LOG_FILE"
+        fi
+    else
+        echo "Error merging BAM files for $TF. Check samtools output." >> "$LOG_FILE"
+    fi
+
+done
+
+echo "BAM file merging completed at $(date)" >> "$LOG_FILE"
+```
 ## Peak Calling via MACS2 from aggregated BAM files
 ```bash
 for f in *sorted.bam; do
@@ -277,6 +471,106 @@ done
 module load bedtools/2.29.2
 for f in *_peaks.narrowPeak; do
   awk '{print $1"\t"$2"\t"$3}' $f | sortBed -i - | mergeBed -i - > ${f%%.bed}_real.bed
+done
+```
+## Peak Calling via MACS2 from aggregated BAM files RHH mm39
+```bash
+nano peak.calling_aggregated_bam_mm39
+
+#!/bin/bash
+#SBATCH --job-name=PeakCalling
+#SBATCH --output=peak_calling_%j.out
+#SBATCH --error=peak_calling_%j.err
+#SBATCH --time=01:00:00
+#SBATCH --mem=8GB
+#SBATCH --cpus-per-task=4
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+
+# Directory containing sorted BAM files
+INPUT_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/aggregated_bam_mm39"
+
+# Output directory for MACS2 peaks
+OUTPUT_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/aggregated_bam_mm39/peaks"
+mkdir -p "$OUTPUT_DIR"
+
+# Load required modules
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+# Perform peak calling for each sorted BAM file
+for f in "$INPUT_DIR"/*sorted.bam; do
+    BASENAME=$(basename "$f" .sorted.bam)
+    macs2 callpeak -t "$f" -f BAMPE -g mm --keep-dup all -n "${OUTPUT_DIR}/${BASENAME}" \
+    --nomodel --extsize 55 -B --SPMR
+    if [ $? -eq 0 ]; then
+        echo "MACS2 peak calling successful for $f"
+    else
+        echo "Error in MACS2 peak calling for $f" >&2
+        exit 1
+    fi
+done
+
+# Make 3-col bed file after peak calling
+
+for f in "$OUTPUT_DIR"/*_peaks.narrowPeak; do
+    BASENAME=$(basename "$f" _peaks.narrowPeak)
+    awk '{print $1"\t"$2"\t"$3}' "$f" | sortBed -i - > "$OUTPUT_DIR/${BASENAME}_real.bed"
+    if [ $? -eq 0 ]; then
+        echo "3-column BED file created for $f"
+    else
+        echo "Error creating BED file for $f" >&2
+        exit 1
+    fi
+done
+```
+## Peak Calling via MACS2 from aggregated BAM files RHH mm10
+```bash
+peak.calling_aggregated_bam_mm10.sh
+
+#!/bin/bash
+#SBATCH --job-name=PeakCalling
+#SBATCH --output=peak_calling_%j.out
+#SBATCH --error=peak_calling_%j.err
+#SBATCH --time=01:00:00
+#SBATCH --mem=8GB
+#SBATCH --cpus-per-task=4
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+
+# Directory containing sorted BAM files
+INPUT_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/aggregated_bam_mm10"
+
+# Output directory for MACS2 peaks
+OUTPUT_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/aggregated_bam_mm10/peaks"
+mkdir -p "$OUTPUT_DIR"
+
+# Load required modules
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+# Perform peak calling for each sorted BAM file
+for f in "$INPUT_DIR"/*sorted.bam; do
+    BASENAME=$(basename "$f" .sorted.bam)
+    macs2 callpeak -t "$f" -f BAMPE -g mm --keep-dup all -n "${OUTPUT_DIR}/${BASENAME}" \
+    --nomodel --extsize 55 -B --SPMR
+    if [ $? -eq 0 ]; then
+        echo "MACS2 peak calling successful for $f"
+    else
+        echo "Error in MACS2 peak calling for $f" >&2
+        exit 1
+    fi
+done
+
+# Make 3-col bed file after peak calling
+
+for f in "$OUTPUT_DIR"/*_peaks.narrowPeak; do
+    BASENAME=$(basename "$f" _peaks.narrowPeak)
+    awk '{print $1"\t"$2"\t"$3}' "$f" | sortBed -i - > "$OUTPUT_DIR/${BASENAME}_real.bed"
+    if [ $? -eq 0 ]; then
+        echo "3-column BED file created for $f"
+    else
+        echo "Error creating BED file for $f" >&2
+        exit 1
+    fi
 done
 ```
 ## Generate master peak file
