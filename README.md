@@ -65,7 +65,7 @@ This repository contains all code used to analyse and visualise the data from th
 - [Figure_SI_6_D_-_GSEA](Figure_SI_6_D_-_GSEA.md)
 
 ## Response_18
-- [Response Fig. X - X](Response Fig. X - X.md)
+- [Response_X](https://github.com/HaenselHertschEpiLab/DynaTag/blob/main/Response_X.md)
 
 
 
