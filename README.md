@@ -65,7 +65,7 @@ This repository contains all code used to analyse and visualise the data from th
 - [Figure_SI_6_D_-_GSEA](Figure_SI_6_D_-_GSEA.md)
 
 ## Response_18
-- [Figure_SI_6_D_-_GSEA](Figure.md)
+- [Response Fig. X - X](Response Fig. X - X.md)
 
 
 
