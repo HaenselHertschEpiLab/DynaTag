@@ -473,7 +473,7 @@ for f in *_peaks.narrowPeak; do
   awk '{print $1"\t"$2"\t"$3}' $f | sortBed -i - | mergeBed -i - > ${f%%.bed}_real.bed
 done
 ```
-## Peak Calling via MACS2 from aggregated BAM files RHH mm39
+## Peak Calling via MACS2 from aggregated BAM files mm39 (RHH)
 ```bash
 nano peak.calling_aggregated_bam_mm39
 
@@ -523,7 +523,7 @@ for f in "$OUTPUT_DIR"/*_peaks.narrowPeak; do
     fi
 done
 ```
-## Peak Calling via MACS2 from aggregated BAM files RHH mm10
+## Peak Calling via MACS2 from aggregated BAM files mm10 (RHH)
 ```bash
 peak.calling_aggregated_bam_mm10.sh
 
@@ -571,6 +571,15 @@ for f in "$OUTPUT_DIR"/*_peaks.narrowPeak; do
         echo "Error creating BED file for $f" >&2
         exit 1
     fi
+done
+```
+## Generate bigwig files to compare similarity with bulk DynaTag data mm39 and mm10 (RHH)
+```bash
+for f1 in *.sorted.bam; do
+sbatch -J BAMindex --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools index $f1"
+done
+for f1 in *.sorted.bam; do
+sbatch --mem 16G -J BAM2BW --cpus-per-task 8 --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && bamCoverage -p 8 -b $f1 -bs 10 --skipNAs --centerReads --normalizeUsing CPM -of bigwig -o /scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/20231231_icell8cx_ESC/outs/fastq_path/TRIMMED_DIR/alignment/bigwig_snDynaTag_ESC/${f1%%.sorted.bam}_cpm.bw"
 done
 ```
 ## Generate master peak file
