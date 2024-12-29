@@ -68,8 +68,11 @@ mkdir TRIMMED_DIR
 nano trimm_fastq.sh
 
 #!/bin/bash
-    #SBATCH --time=6:00:00
-    #SBATCH --mem=8gb
+#SBATCH --time=02:00:00
+#SBATCH --mem=32gb
+#SBATCH --cpus-per-task=8
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
 # Directory containing the FASTQ files
 FASTQ_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/fastq_20241203_GP_scDynaTag_mESC_EpiLC/outs/fastq_path"
 # Directory to store trimmed FASTQ files
