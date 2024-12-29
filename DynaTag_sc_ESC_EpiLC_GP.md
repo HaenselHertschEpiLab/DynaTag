@@ -91,3 +91,57 @@ for f1 in $FASTQ_DIR/*_R1_001.fastq.gz; do
              $f1 $f2
 done
 ```
+## Alignment RHH mm39
+```bash
+mkdir alignment/sam_mm39
+
+nano alignment_mm39.sh
+
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --mem=44gb
+#SBATCH --cpus-per-task=16
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+# Directory containing the trimmed FASTQ files
+FASTQ_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/fastq_20241203_GP_scDynaTag_mESC_EpiLC/outs/fastq_path/TRIMMED_DIR"
+# Directory to store sam files
+SAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/fastq_20241203_GP_scDynaTag_mESC_EpiLC/outs/fastq_path/TRIMMED_DIR/alignment/sam_mm39"
+module load bio/Bowtie2/2.5.1-GCC-12.3.0
+ref='/projects/ag-haensel/Pascal/genome_files/mm39_bowtie/ref/ref'
+# Loop through all R1 FASTQ files
+for f1 in $FASTQ_DIR/*_R1_001.trimmed.fastq.gz; do
+    # Corresponding R2 file
+    f2=$(echo $f1 | sed 's/_R1_001.trimmed.fastq.gz/_R2_001.trimmed.fastq.gz/')
+    # Define base_name based on f1
+    base_name=$(basename "$f1" _R1_001.trimmed.fastq.gz)
+    bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -p 16 -I 10 -X 700 -x "$ref" -1 "$f1" -2 "$f2" -S "$SAM_DIR/${base_name}_bowtie2.sam"
+done
+```
+## Alignment RHH mm10
+```bash
+mkdir alignment/sam_mm10
+
+nano alignment_mm10.sh
+
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --mem=44gb
+#SBATCH --cpus-per-task=16
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+# Directory containing the trimmed FASTQ files
+FASTQ_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/fastq_20241203_GP_scDynaTag_mESC_EpiLC/outs/fastq_path/TRIMMED_DIR"
+# Directory to store sam files
+SAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/fastq_20241203_GP_scDynaTag_mESC_EpiLC/outs/fastq_path/TRIMMED_DIR/alignment/sam_mm10"
+module load bio/Bowtie2/2.5.1-GCC-12.3.0
+ref='/projects/ag-haensel/Pascal/genome_files/mm10_bowtie/ref/ref'
+# Loop through all R1 FASTQ files
+for f1 in $FASTQ_DIR/*_R1_001.trimmed.fastq.gz; do
+    # Corresponding R2 file
+    f2=$(echo $f1 | sed 's/_R1_001.trimmed.fastq.gz/_R2_001.trimmed.fastq.gz/')
+    # Define base_name based on f1
+    base_name=$(basename "$f1" _R1_001.trimmed.fastq.gz)
+    bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -p 16 -I 10 -X 700 -x "$ref" -1 "$f1" -2 "$f2" -S "$SAM_DIR/${base_name}_bowtie2.sam"
+done
+```
