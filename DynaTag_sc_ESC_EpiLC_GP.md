@@ -145,3 +145,51 @@ for f1 in $FASTQ_DIR/*_R1_001.trimmed.fastq.gz; do
     bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant -p 16 -I 10 -X 700 -x "$ref" -1 "$f1" -2 "$f2" -S "$SAM_DIR/${base_name}_bowtie2.sam"
 done
 ```
+## Generate BAM files RHH mm39
+```bash
+mkdir alignment/bam_mm39
+
+nano sam_mm39.to.bam_mm39.sh
+
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --mem=44gb
+#SBATCH --cpus-per-task=16
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+# Directory containing the trimmed FASTQ files
+SAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/fastq_20241203_GP_scDynaTag_mESC_EpiLC/outs/fastq_path/TRIMMED_DIR/alignment/sam_mm39"
+# Directory to store sam files
+BAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/fastq_20241203_GP_scDynaTag_mESC_EpiLC/outs/fastq_path/TRIMMED_DIR/alignment/bam_mm39"
+module load bio/SAMtools/1.19.2-GCC-13.2.0
+# Loop through all R1 FASTQ files
+for f1 in in $SAM_DIR/*_bowtie2.sam; do
+    # Define base_name based on f1
+    base_name=$(basename "$f1" _bowtie2.sam)
+    samtools view -bS -F 0x04 "$f1" > "$BAM_DIR/${base_name}_bowtie2.mapped.bam"
+done
+```
+## Generate BAM files RHH mm10
+```bash
+mkdir alignment/bam_mm10
+
+nano sam_mm10.to.bam_mm10.sh
+
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --mem=44gb
+#SBATCH --cpus-per-task=16
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+# Directory containing the trimmed FASTQ files
+SAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/fastq_20241203_GP_scDynaTag_mESC_EpiLC/outs/fastq_path/TRIMMED_DIR/alignment/sam_mm10"
+# Directory to store sam files
+BAM_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/fastq_20241203_GP_scDynaTag_mESC_EpiLC/outs/fastq_path/TRIMMED_DIR/alignment/bam_mm10"
+module load bio/SAMtools/1.19.2-GCC-13.2.0
+# Loop through all R1 FASTQ files
+for f1 in in $SAM_DIR/*_bowtie2.sam; do
+    # Define base_name based on f1
+    base_name=$(basename "$f1" _bowtie2.sam)
+    samtools view -bS -F 0x04 "$f1" > "$BAM_DIR/${base_name}_bowtie2.mapped.bam"
+done
+```
