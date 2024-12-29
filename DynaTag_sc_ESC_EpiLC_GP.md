@@ -61,4 +61,30 @@ $CELLRANGER mkfastq --id=fastq_20241203_GP_scDynaTag_mESC_EpiLC \
                     --run=$RUN_DIR \
                     --csv=$CSV_FILE
 ```
+## Trim fastq files RHH 27122024
+```bash
+mkdir TRIMMED_DIR
 
+nano trimm_fastq.sh
+
+#!/bin/bash
+    #SBATCH --time=6:00:00
+    #SBATCH --mem=8gb
+# Directory containing the FASTQ files
+FASTQ_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/fastq_20241203_GP_scDynaTag_mESC_EpiLC/outs/fastq_path"
+# Directory to store trimmed FASTQ files
+TRIMMED_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/snDynaTag/fastq_20241203_GP_scDynaTag_mESC_EpiLC/outs/fastq_path/TRIMMED_DIR"
+module load bio/cutadapt/4.4-GCCcore-12.2.0
+# Loop through all R1 FASTQ files
+for f1 in $FASTQ_DIR/*_R1_001.fastq.gz; do
+    # Corresponding R2 file
+    f2=$(echo $f1 | sed 's/_R1_001.fastq.gz/_R2_001.fastq.gz/')
+    # Extract the basename for naming
+    base_name=$(basename $f1 _R1_001.fastq.gz)
+    # Run cutadapt directly
+    cutadapt -a CTGTCTCTTATACACATCT -A CTGTCTCTTATACACATCT -m 15 -q 20 \
+             -o $TRIMMED_DIR/${base_name}_R1_001.trimmed.fastq.gz \
+             -p $TRIMMED_DIR/${base_name}_R2_001.trimmed.fastq.gz \
+             $f1 $f2
+done
+```
