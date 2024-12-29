@@ -61,14 +61,14 @@ $CELLRANGER mkfastq --id=fastq_20241203_GP_scDynaTag_mESC_EpiLC \
                     --run=$RUN_DIR \
                     --csv=$CSV_FILE
 ```
-## Trim fastq files RHH 27122024
+## Trim fastq files
 ```bash
 mkdir TRIMMED_DIR
 
 nano trimm_fastq.sh
 
 #!/bin/bash
-#SBATCH --time=02:00:00
+#SBATCH --time=08:00:00
 #SBATCH --mem=32gb
 #SBATCH --cpus-per-task=8
 #SBATCH --mail-type=END,FAIL
