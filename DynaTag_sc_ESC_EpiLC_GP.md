@@ -338,6 +338,30 @@ for TF in "${TRANSCRIPTION_FACTORS[@]}"; do
 done
 
 echo "BAM file merging completed at $(date)" >> "$LOG_FILE"
+
+cat merge_log.txt | grep "Merging" | grep "YAP1"
+Merging 175 files for YAP1_ESC_1:
+Merging 178 files for YAP1_ESC_2:
+Merging 214 files for YAP1_EpiLC_1:
+Merging 172 files for YAP1_EpiLC_2:
+
+cat merge_log.txt | grep "Merging" | grep "OCT4"
+Merging 174 files for OCT4_ESC_1:
+Merging 144 files for OCT4_ESC_2:
+Merging 195 files for OCT4_EpiLC_1:
+Merging 195 files for OCT4_EpiLC_2:
+
+cat merge_log.txt | grep "Merging" | grep "NANOG"
+Merging 153 files for NANOG_ESC_1:
+Merging 146 files for NANOG_ESC_2:
+Merging 208 files for NANOG_EpiLC_1:
+Merging 193 files for NANOG_EpiLC_2:
+
+cat merge_log.txt | grep "Merging" | grep "MYC"
+Merging 190 files for MYC_ESC_1:
+Merging 170 files for MYC_ESC_2:
+Merging 203 files for MYC_EpiLC_1:
+Merging 182 files for MYC_EpiLC_2:
 ```
 ## Peak Calling via MACS2 from aggregated BAM files mm39
 ```bash
