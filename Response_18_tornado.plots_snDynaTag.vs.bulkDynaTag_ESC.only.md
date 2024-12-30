@@ -174,12 +174,44 @@ done
 ```
 ## Compute Matrix && plotHeatmap analysis of snDynaTag ESC and EpiLC signal at TSS of target genes. snDynaTag experiments performed by GP and OvR.
 ```bash
-nano computematrix_plotHeatmap_snDynaTag_GP_ESC_EpiLC_mm10.sh
+cat renaming_script.sh
+#!/bin/bash
 
+# Directory containing BigWig files
+BIGWIG_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bigwig/snDynaTag_GP_ESC_EpiLC_mm10_bigwig"
+
+# Mapping of old to new file names
+declare -A RENAME_MAP=(
+    ["MYC_ESC_merged_mm10_cpm.bw"]="merged_sample_MYC_ESC_combined_mm10_cpm.bw"
+    ["MYC_EpiLC_merged_mm10_cpm.bw"]="merged_sample_MYC_EpiLC_combined_mm10_cpm.bw"
+    ["NANOG_ESC_merged_mm10_cpm.bw"]="merged_sample_NANOG_ESC_combined_mm10_cpm.bw"
+    ["NANOG_EpiLC_merged_mm10_cpm.bw"]="merged_sample_NANOG_EpiLC_combined_mm10_cpm.bw"
+    ["OCT4_ESC_merged_mm10_cpm.bw"]="merged_sample_OCT4_ESC_combined_mm10_cpm.bw"
+    ["OCT4_EpiLC_merged_mm10_cpm.bw"]="merged_sample_OCT4_EpiLC_combined_mm10_cpm.bw"
+    ["YAP1_ESC_merged_mm10_cpm.bw"]="merged_sample_YAP1_ESC_combined_mm10_cpm.bw"
+    ["YAP1_EpiLC_merged_mm10_cpm.bw"]="merged_sample_YAP1_EpiLC_combined_mm10_cpm.bw"
+)
+
+# Iterate over the mapping and rename files
+for old_name in "${!RENAME_MAP[@]}"; do
+    old_path="${BIGWIG_DIR}/${old_name}"
+    new_path="${BIGWIG_DIR}/${RENAME_MAP[$old_name]}"
+    
+    if [[ -f "$old_path" ]]; then
+        echo "Renaming $old_path to $new_path"
+        mv "$old_path" "$new_path"
+    else
+        echo "Warning: File $old_path does not exist. Skipping..."
+    fi
+done
+
+echo "Renaming complete."
+
+nano computematrix_plotHeatmap_snDynaTag_GP_ESC_EpiLC_mm10_v2.sh
 #!/bin/bash
 #SBATCH --time=00:30:00
-#SBATCH --mem=32gb
-#SBATCH --cpus-per-task=8
+#SBATCH --mem=16gb
+#SBATCH --cpus-per-task=32
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=rhaensel@uni-koeln.de
 
@@ -191,8 +223,8 @@ REGION_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_consensus_ta
 BIGWIG_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bigwig/snDynaTag_GP_ESC_EpiLC_mm10_bigwig"
 OUTPUT_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/plotHeatmap/snDynaTag_pseudobulk_GP_ESC_EpiLC_mm10_plotHeatmaps"
 
-# TF files
-TFS=(
+# TF files for merged and replicates
+REPLICATE_TFS=(
     "MYC_ESC_1"
     "MYC_ESC_2"
     "MYC_EpiLC_1"
@@ -209,6 +241,14 @@ TFS=(
     "YAP1_ESC_2"
     "YAP1_EpiLC_1"
     "YAP1_EpiLC_2"
+    "MYC_ESC_combined"
+    "NANOG_ESC_combined"
+    "OCT4_ESC_combined"
+    "YAP1_ESC_combined"
+    "MYC_EpiLC_combined"
+    "NANOG_EpiLC_combined"
+    "OCT4_EpiLC_combined"
+    "YAP1_EpiLC_combined"
 )
 
 # Function to process each TF and condition
@@ -259,7 +299,7 @@ do_analysis() {
         --colorMap binary \
         --alpha "1.0" \
         --zMin 0 \
-        --zMax 2 \
+        --zMax 2.5 \
         --xAxisLabel "Distance" \
         --yAxisLabel "Target_Genes" \
         --heatmapWidth 7.5 \
@@ -289,6 +329,7 @@ do_analysis() {
         --binSize 50 > "${OUTPUT_DIR}/computeMatrix_${tf_name}_2500.log" 2>&1 || echo "Error running computeMatrix for ${tf_name} (2500bp)"
 
     # PlotHeatmap: +/- 2500 bp
+    echo "Running plotHeatmap for +/- 2500 bp..."
     plotHeatmap --matrixFile "$matrix_file_2500" \
         --outFileName "$heatmap_file_2500" \
         --plotFileFormat "pdf" \
@@ -297,7 +338,7 @@ do_analysis() {
         --colorMap binary \
         --alpha "1.0" \
         --zMin 0 \
-        --zMax 0.25 \
+        --zMax 0.5 \
         --xAxisLabel "Distance" \
         --yAxisLabel "Target_Genes" \
         --heatmapWidth 7.5 \
@@ -311,19 +352,23 @@ do_analysis() {
         --labelRotation "0" > "${OUTPUT_DIR}/plotHeatmap_${tf_name}_2500.log" 2>&1 || echo "Error running plotHeatmap for ${tf_name} (2500bp)"
 }
 
-# Main script
-for tf_name in "${TFS[@]}"; do
-    tf_base=$(echo "$tf_name" | cut -d'_' -f1) # Extract base name (e.g., YAP1)
-    region_file="${REGION_DIR}/${tf_base}_mESC_mm10_target.genes_10kb_ordered_filtered_genes.bed"
-    bigwig_file="${BIGWIG_DIR}/merged_sample_${tf_name}_mm10_cpm.bw"
+# Function to process each TF for replicate files
+do_replicate_analysis() {
+    local tf_name=$1
+    local tf_base=$(echo "$tf_name" | cut -d'_' -f1)
+    local region_file="${REGION_DIR}/${tf_base}_mESC_mm10_target.genes_10kb_ordered_filtered_genes.bed"
+    local bigwig_file="${BIGWIG_DIR}/merged_sample_${tf_name}_mm10_cpm.bw"
 
-    echo "Processing TF: $tf_name"
-    echo "Looking for BigWig file: $bigwig_file"
-
-    if [[ -f "$bigwig_file" ]]; then
+    if [[ -f "$bigwig_file" && -f "$region_file" ]]; then
         do_analysis "$tf_name" "$region_file" "$bigwig_file"
     else
-        echo "No matching BigWig file found for $tf_name in $BIGWIG_DIR"
+        echo "Missing files for $tf_name replicate analysis: $region_file or $bigwig_file"
     fi
+}
+
+# Main script
+echo "Processing replicate TF files..."
+for tf_name in "${REPLICATE_TFS[@]}"; do
+    do_replicate_analysis "$tf_name"
 done
 ```
