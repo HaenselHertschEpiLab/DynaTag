@@ -372,3 +372,160 @@ for tf_name in "${REPLICATE_TFS[@]}"; do
     do_replicate_analysis "$tf_name"
 done
 ```
+## log2 ratio prepration of ESC vs EpiLC and plotHeatmap analyses. snDynaTag experiments performed by GP and OvR.
+```bash
+
+#Generation of log2 ratio files
+
+nano bigwigcompare_Log2_Ratio.sh
+
+#!/bin/bash
+#SBATCH --time=02:00:00
+#SBATCH --mem=16gb
+#SBATCH --cpus-per-task=16
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rhaensel@uni-koeln.de
+
+# Activate conda environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+# Directories
+BIGWIG_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bigwig/snDynaTag_GP_ESC_EpiLC_mm10_bigwig"
+OUTPUT_DIR="${BIGWIG_DIR}/log2_ratio"
+
+# TF files for combined samples
+COMBINED_TFS=(
+    "MYC"
+    "NANOG"
+    "OCT4"
+    "YAP1"
+)
+
+# Ensure output directory exists
+mkdir -p "$OUTPUT_DIR"
+
+# Function to process each TF
+generate_log2_ratio() {
+    local tf_base=$1
+
+    # Input files
+    local bigwig_esc="${BIGWIG_DIR}/merged_sample_${tf_base}_ESC_combined_mm10_cpm.bw"
+    local bigwig_epilc="${BIGWIG_DIR}/merged_sample_${tf_base}_EpiLC_combined_mm10_cpm.bw"
+
+    # Output file
+    local output_file="${OUTPUT_DIR}/log2_ratio_${tf_base}_ESC_vs_EpiLC_mm10.bw"
+
+    # Check if input files exist
+    if [[ -f "$bigwig_esc" && -f "$bigwig_epilc" ]]; then
+        echo "Generating log2 ratio for TF: $tf_base"
+        echo "BigWig ESC: $bigwig_esc"
+        echo "BigWig EpiLC: $bigwig_epilc"
+        echo "Output file: $output_file"
+
+        # Run bigwigCompare
+        bigwigCompare \
+            --bigwig1 "$bigwig_esc" \
+            --bigwig2 "$bigwig_epilc" \
+            --outFileName "$output_file" \
+            --outFileFormat "bigwig" \
+            --operation log2 \
+            --pseudocount 1 \
+            --skipZeroOverZero \
+            --binSize 50 > "${OUTPUT_DIR}/bigwigCompare_${tf_base}.log" 2>&1 || echo "Error generating log2 ratio for $tf_base"
+    else
+        echo "Missing files for $tf_base: $bigwig_esc or $bigwig_epilc"
+    fi
+}
+
+# Main script
+for tf_base in "${COMBINED_TFS[@]}"; do
+    generate_log2_ratio "$tf_base"
+done
+
+echo "All log2 ratio files generated."
+
+#log2 analysis as plotHeatmap
+
+nano submit_log2_heatmap_jobs.sh
+
+#!/bin/bash
+
+# Directories
+REGION_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_consensus_target.genes_CHIP-ATLAS/filtered_genes"
+BIGWIG_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bigwig/snDynaTag_GP_ESC_EpiLC_mm10_bigwig/log2_ratio"
+OUTPUT_DIR="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/plotHeatmap/snDynaTag_pseudobulk_GP_ESC_EpiLC_mm10_log2_plotHeatmaps"
+
+# TF files for combined samples
+COMBINED_TFS=(
+    "MYC"
+    "NANOG"
+    "OCT4"
+    "YAP1"
+)
+
+# Ensure output directory exists
+mkdir -p "$OUTPUT_DIR"
+
+# Function to submit job for each TF
+submit_job() {
+    local tf_base=$1
+    local region_file="${REGION_DIR}/${tf_base}_mESC_mm10_target.genes_10kb_ordered_filtered_genes.bed"
+    local bigwig_log2="${BIGWIG_DIR}/log2_ratio_${tf_base}_ESC_vs_EpiLC_mm10.bw"
+    local matrix_file="${OUTPUT_DIR}/${tf_base}_log2_matrix.gz"
+    local heatmap_file="${OUTPUT_DIR}/${tf_base}_log2_heatmap.pdf"
+    local log_file="${OUTPUT_DIR}/${tf_base}_log2_heatmap.log"
+
+    # Submit job using sbatch --wrap
+    sbatch --time=02:00:00 --mem=16gb --cpus-per-task=8 \
+        --job-name="heatmap_${tf_base}" \
+        --output="${OUTPUT_DIR}/${tf_base}_job.out" \
+        --error="${OUTPUT_DIR}/${tf_base}_job.err" \
+        --wrap "
+        conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && \
+        computeMatrix reference-point \
+            --regionsFileName \"$region_file\" \
+            --scoreFileName \"$bigwig_log2\" \
+            --outFileName \"$matrix_file\" \
+            --samplesLabel \"Log2 ESC vs EpiLC\" \
+            --numberOfProcessors 8 \
+            --referencePoint TSS \
+            --beforeRegionStartLength 2500 \
+            --afterRegionStartLength 2500 \
+            --sortRegions \"keep\" \
+            --averageTypeBins \"mean\" \
+            --missingDataAsZero \
+            --binSize 50 && \
+        plotHeatmap \
+            --matrixFile \"$matrix_file\" \
+            --outFileName \"$heatmap_file\" \
+            --plotFileFormat pdf \
+            --dpi 200 \
+            --colorMap "bwr" \
+            --samplesLabel \"Log2 ESC vs EpiLC\" \
+            --legendLocation best \
+            --heatmapWidth 7.5 \
+            --heatmapHeight 7.5 \
+            --whatToShow \"heatmap and colorbar\" \
+            --sortRegions \"no\" \
+            --startLabel \"Upstream\" \
+            --endLabel \"Downstream\" \
+            --refPointLabel \"TSS\" \
+            --zMin -0.1 \
+            --zMax 0.1 \
+            --plotTitle \"$tf_base Log2 Ratio\" > \"$log_file\" 2>&1"
+}
+
+# Submit jobs for all TFs
+for tf_base in "${COMBINED_TFS[@]}"; do
+    submit_job "$tf_base"
+done
+
+echo "All jobs submitted."
+```
+
+
+
+
+
+
+
