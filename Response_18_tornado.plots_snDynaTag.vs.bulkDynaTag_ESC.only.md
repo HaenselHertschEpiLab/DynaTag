@@ -372,7 +372,7 @@ for tf_name in "${REPLICATE_TFS[@]}"; do
     do_replicate_analysis "$tf_name"
 done
 ```
-## log2 ratio prepration of ESC vs EpiLC and plotHeatmap analyses. snDynaTag experiments performed by GP and OvR.
+## log2 ratio prepration of snDynaTag ESC vs EpiLC and plotHeatmap analyses. snDynaTag experiments performed by GP and OvR.
 ```bash
 
 #Generation of log2 ratio files
