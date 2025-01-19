@@ -1184,6 +1184,38 @@ for cell_line in "${cell_lines[@]}"; do
     done
 done
 ```
+## Generate Count Matrices mm10 --> RHH needs to be done
+```bash
+#!/bin/bash -l
+#SBATCH --time=4:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=48gb
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=phunold@uni-koeln.de
+
+cell_lines=("ESC" "EpiLC-d2")
+epitopes=("MYC" "SOX2" "NANOG" "OCT4" "YAP1")
+phases=("G1" "G2" "S")
+peak_dir="/scratch/phunold/ESC_EpiLC/bam/peaks/consensus/master_peaks"
+bam_dir="/scratch/phunold/ESC_EpiLC/bam"
+bedgraph_path="/scratch/phunold/ESC_EpiLC/bedgraph"
+
+module load bedtools/2.29.2
+
+for cell_line in "${cell_lines[@]}"; do
+    for epitope in "${epitopes[@]}"; do
+        for phase in "${phases[@]}"; do
+            peak_file="${peak_dir}/${epitope}-${phase}_all_peaks.over59nt.sorted.bed"
+            if [ -f "$peak_file" ]; then
+                for f1 in "$bam_dir"/*"${cell_line}-${epitope}-${phase}"*.sorted.bam; do
+                    bedtools coverage -a "$peak_file" -b "$f1" -counts > "$bedgraph_path/$(basename ${f1%%.sorted.bam}).bedgraph"
+                    awk -v OFS='\t' '{print "chr"$1":"$2"-"$3, $4}' "$bedgraph_path/$(basename ${f1%%.sorted.bam}).bedgraph" > "$bedgraph_path/$(basename ${f1%%.sorted.bam})_counts.txt"
+                done
+            fi
+        done
+    done
+done
+```
 ## Generate BigWig Files for optical inspection mm39
 ```bash
 
