@@ -1839,6 +1839,236 @@ plot
 # Save the plot as a PDF
 ggsave(filename = paste0(file_path, TF, "_Regions_Cell_Cycle_Phases.pdf"), plot = plot)
 ```
+
+# RHH reproduces Pascal's Differential Binding Analysis mm39
+## Load Packages
+```R
+# RHH reproduces Pascal's Differential Binding Analysis mm39
+## Load Packages
+library(edgeR)
+library(ggplot2)
+library(dplyr)
+
+## Load Data and Assemble Count Matrices
+rm(list = ls())
+
+# Define the file path
+file_path <- "/Users/hansel01/Desktop/Desktop_2/job_application_082016/CMMC/CMMC_RHH.lab/CMMC_Projects/DynaTag/seq_data_DynaTag/DynaTag/ESC_EpiLC_DynaTag/TF_count_matrices/"
+
+# Define the TF to analyze
+TF <- "NANOG"  # Change this to any other TF you want to analyze
+
+# Read count data from files for all phases
+ESC_G1_1 <- read.table(paste0(file_path, "ESC-", TF, "-G1-1_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+ESC_G1_2 <- read.table(paste0(file_path, "ESC-", TF, "-G1-2_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+EpiLC_G1_1 <- read.table(paste0(file_path, "EpiLC-d2-", TF, "-G1-1_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+EpiLC_G1_2 <- read.table(paste0(file_path, "EpiLC-d2-", TF, "-G1-2_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+
+ESC_S_1 <- read.table(paste0(file_path, "ESC-", TF, "-S-1_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+ESC_S_2 <- read.table(paste0(file_path, "ESC-", TF, "-S-2_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+EpiLC_S_1 <- read.table(paste0(file_path, "EpiLC-d2-", TF, "-S-1_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+EpiLC_S_2 <- read.table(paste0(file_path, "EpiLC-d2-", TF, "-S-2_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+
+ESC_G2_1 <- read.table(paste0(file_path, "ESC-", TF, "-G2-1_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+ESC_G2_2 <- read.table(paste0(file_path, "ESC-", TF, "-G2-2_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+EpiLC_G2_1 <- read.table(paste0(file_path, "EpiLC-d2-", TF, "-G2-1_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+EpiLC_G2_2 <- read.table(paste0(file_path, "EpiLC-d2-", TF, "-G2-2_counts.txt"), header=FALSE, row.names=1, check.names=FALSE)
+
+# Prepare merged data
+merge_phase_data <- function(esc1, esc2, epilc1, epilc2) {
+  esc2 <- esc2[, 1]
+  epilc1 <- epilc1[, 1]
+  epilc2 <- epilc2[, 1]
+  merged <- cbind(esc1, esc2, epilc1, epilc2)
+  colnames(merged)[1] <- "ESC_1"
+  return(merged)
+}
+
+G1_merged <- merge_phase_data(ESC_G1_1, ESC_G1_2, EpiLC_G1_1, EpiLC_G1_2)
+S_merged <- merge_phase_data(ESC_S_1, ESC_S_2, EpiLC_S_1, EpiLC_S_2)
+G2_merged <- merge_phase_data(ESC_G2_1, ESC_G2_2, EpiLC_G2_1, EpiLC_G2_2)
+
+## Setup edgeR Parameters
+analyze_phase <- function(merged_data, phase, file_path, TF) {
+  # Set up design and group
+  group <- factor(c("ESC", "ESC", "EpiLC", "EpiLC"), levels = c("ESC", "EpiLC"))
+  design <- model.matrix(~0 + group)
+  colnames(design) <- levels(group)
+  contrast <- makeContrasts(reference_vs_other = "EpiLC - ESC", levels = design)
+  
+  # edgeR Differential Binding Analysis
+  dge <- DGEList(counts = merged_data)
+  dge$samples$group <- group
+  dge <- calcNormFactors(dge, method = "TMM")
+  
+  # Plot MDS
+  pdf(file = paste0(file_path, TF, "_MDS_Plot_", phase, ".pdf"))
+  plotMDS(dge, main = paste(TF, "MDS Plot -", phase), col = as.numeric(group))
+  dev.off()
+  
+  # Fit the model
+  dge <- estimateDisp(dge, design)
+  fit <- glmFit(dge, design)
+  lrt <- glmLRT(fit, contrast = contrast)
+  
+  # Extract results
+  results <- topTags(lrt, n = Inf)$table
+  results$FDR <- p.adjust(results$PValue, method = "BH")
+  
+  # Volcano Plot with Correct Labels
+  sig_regions <- results %>%
+    mutate(
+      Category = case_when(
+        logFC < -0.5 & FDR < 0.05 ~ "Downregulated",
+        logFC > 0.5 & FDR < 0.05 ~ "Upregulated",
+        TRUE ~ "Non-significant"
+      )
+    )
+  
+  # Count regions by category for labels
+  category_counts <- sig_regions %>%
+    group_by(Category) %>%
+    summarize(Count = n(), .groups = "drop")
+  
+  # Build legend labels with counts
+  legend_labels <- category_counts %>%
+    mutate(Label = paste(Category, "(", Count, ")")) %>%
+    pull(Label)
+  
+  # Generate Volcano Plot
+  volcano_plot <- ggplot(data = sig_regions, aes(x = logFC, y = -log10(FDR), color = Category)) +
+    geom_point(alpha = 0.5) +
+    scale_color_manual(values = c("Downregulated" = "darkgrey", 
+                                  "Non-significant" = "lightblue", 
+                                  "Upregulated" = "lightgrey"),
+                       labels = legend_labels) +
+    theme_classic() +
+    ggtitle(paste(TF, phase, "Phase")) +
+    theme(legend.position = "right") +
+    xlim(c(-max(abs(results$logFC)), max(abs(results$logFC)))) +
+    labs(x = "Log Fold Change", y = "-Log10 FDR", color = "Differential Expression")
+  
+  # Save the Volcano Plot
+  ggsave(filename = paste0(file_path, TF, "_Volcano_Plot_", phase, ".pdf"), plot = volcano_plot)
+  
+  # Extract BED File
+  results$chr <- sapply(strsplit(rownames(results), "[:-]"), `[`, 1)
+  results$start <- as.numeric(sapply(strsplit(rownames(results), "[:-]"), `[`, 2))
+  results$end <- as.numeric(sapply(strsplit(rownames(results), "[:-]"), `[`, 3))
+  
+  down_regions <- results %>%
+    filter(logFC < -0.5 & FDR < 0.05) %>%
+    select(chr, start, end) %>%
+    mutate(category = "DOWN")
+  
+  up_regions <- results %>%
+    filter(logFC > 0.5 & FDR < 0.05) %>%
+    select(chr, start, end) %>%
+    mutate(category = "UP")
+  
+  combined_regions <- bind_rows(down_regions, up_regions)
+  bed_file <- paste0(file_path, TF, "_edgeR_DBRs_", phase, ".bed")
+  write.table(combined_regions, file = bed_file, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
+  
+  # Region Count Plot
+  lost <- nrow(down_regions)
+  gained <- nrow(up_regions)
+  count_data <- data.frame(
+    Category = c("Lost Regions", "Gained Regions"),
+    Count = c(lost, gained)
+  )
+  count_data <- count_data %>%
+    mutate(Category = factor(Category, levels = c("Lost Regions", "Gained Regions")))
+  
+  region_count_plot <- ggplot(count_data, aes(x = Category, y = Count, fill = Category)) +
+    geom_bar(stat = "identity", position = position_dodge(width = 0.9), colour = "black") +
+    labs(title = paste("Number of", TF, "Regions in", phase, "Phase"),
+         x = "", y = "Number of Regions", fill = "Differential Binding") +
+    theme_minimal() +
+    scale_fill_manual(values = c("Lost Regions" = "darkgrey", "Gained Regions" = "lightblue"))
+  
+  # Save the Region Count Plot
+  ggsave(filename = paste0(file_path, TF, "_Regions_", phase, ".pdf"), plot = region_count_plot)
+}
+
+# Analyze G1, S, and G2 Phases
+analyze_phase(G1_merged, "G1", file_path, TF)
+analyze_phase(S_merged, "S", file_path, TF)
+analyze_phase(G2_merged, "G2", file_path, TF)
+
+## Setup edgeR Parameters for summary table
+analyze_phase_summary.table <- function(merged_data, phase, file_path, TF) {
+  # Set up design and group
+  group <- factor(c("ESC", "ESC", "EpiLC", "EpiLC"), levels = c("ESC", "EpiLC"))
+  design <- model.matrix(~0 + group)
+  colnames(design) <- levels(group)
+  contrast <- makeContrasts(reference_vs_other = "EpiLC - ESC", levels = design)
+  
+  # edgeR Differential Binding Analysis
+  dge <- DGEList(counts = merged_data)
+  dge$samples$group <- group
+  dge <- calcNormFactors(dge, method = "TMM")
+  
+  # Fit the model
+  dge <- estimateDisp(dge, design)
+  fit <- glmFit(dge, design)
+  lrt <- glmLRT(fit, contrast = contrast)
+  
+  # Extract results
+  results <- topTags(lrt, n = Inf)$table
+  results$FDR <- p.adjust(results$PValue, method = "BH")
+  return(results)
+}
+
+# Initialize an empty summary table
+summary_table <- data.frame(
+  Phase = character(),
+  TF = character(),
+  `ESC > EpiLC` = integer(),
+  `ESC < EpiLC` = integer(),
+  stringsAsFactors = FALSE
+)
+
+# Function to count regions and update the summary table
+count_regions <- function(results, phase, tf, table) {
+  down_count <- nrow(results %>% filter(logFC < -0.5 & FDR < 0.05))  # ESC > EpiLC
+  up_count <- nrow(results %>% filter(logFC > 0.5 & FDR < 0.05))  # ESC < EpiLC
+  
+  # Add to summary table
+  table <- rbind(
+    table,
+    data.frame(
+      Phase = phase,
+      TF = tf,
+      `ESC > EpiLC` = down_count,
+      `ESC < EpiLC` = up_count,
+      stringsAsFactors = FALSE
+    )
+  )
+  return(table)
+}
+
+# Analyze G1, S, and G2 Phases and generate the summary table
+results_G1 <- analyze_phase_summary.table(G1_merged, "G1", file_path, TF)
+summary_table <- count_regions(results_G1, "G1", TF, summary_table)
+
+results_S <- analyze_phase_summary.table(S_merged, "S", file_path, TF)
+summary_table <- count_regions(results_S, "S", TF, summary_table)
+
+results_G2 <- analyze_phase_summary.table(G2_merged, "G2", file_path, TF)
+summary_table <- count_regions(results_G2, "G2", TF, summary_table)
+
+# Temporarily store the column names
+column_names <- c("Phase", "TF", "ESC > EpiLC", "ESC < EpiLC")
+
+# Write the column names manually and append the data
+output_summary_file <- paste0(file_path, TF, "_Summary_Table.csv")
+write(column_names, file = output_summary_file, ncolumns = length(column_names), sep = ",")
+write.table(summary_table, file = output_summary_file, row.names = FALSE, col.names = FALSE, sep = ",", quote = FALSE, append = TRUE)
+
+# Print a success message
+message("Summary table saved to: ", output_summary_file)
+```
 # Enrichment of ChIP-Atlas target genes
 ```R
 # Read the TSV file into a data frame
