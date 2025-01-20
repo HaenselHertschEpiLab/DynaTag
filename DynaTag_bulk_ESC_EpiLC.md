@@ -1049,7 +1049,7 @@ awk '{if (($3-$2) >= 60) print $0}' MYC-G2_all_peaks.bed | sortBed -i - | mergeB
 cat ESC-ATAC_master_peaks.bed EpiLC-ATAC_master_peaks.bed | sortBed -i - > ATAC_all_peaks.bed
 awk '{if (($3-$2) >= 60) print $0}' ATAC_all_peaks.bed | sortBed -i - | mergeBed -i - > ATAC_all_peaks.over59nt.sorted.bed
 ```
-## Filter Consensus Peaks mm10
+## Filter Consensus Peaks mm10 greater than 59bp peak size
 ```bash
 
 nano filter_consensus_peaks_mm10.sh
@@ -1150,8 +1150,116 @@ awk '{if (($3-$2) >= 60) print $0}' MYC-G2_all_peaks.bed | sortBed -i - | mergeB
 
 rm *_all_peaks.bed
 ```
+## Further Filter Consensus Peaks mm10 greater than 99bp peak size
+```bash
+nano filter_consensus_peaks_greater_than_99bp_mm10.sh
+
+cat ESC-OCT4-G1_master_peaks.bed EpiLC-OCT4-G1_master_peaks.bed | sortBed -i - > OCT4-G1_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' OCT4-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > OCT4-G1_all_peaks.over99nt.sorted.bed
+
+cat ESC-OCT4-S_master_peaks.bed EpiLC-OCT4-S_master_peaks.bed | sortBed -i - > OCT4-S_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' OCT4-S_all_peaks.bed | sortBed -i - | mergeBed -i - > OCT4-S_all_peaks.over99nt.sorted.bed
+
+cat ESC-OCT4-G2_master_peaks.bed EpiLC-OCT4-G2_master_peaks.bed | sortBed -i - > OCT4-G2_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' OCT4-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > OCT4-G2_all_peaks.over99nt.sorted.bed
 
 
+cat ESC-SOX2-G1_master_peaks.bed EpiLC-SOX2-G1_master_peaks.bed | sortBed -i - > SOX2-G1_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' SOX2-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > SOX2-G1_all_peaks.over99nt.sorted.bed
+
+cat ESC-SOX2-S_master_peaks.bed EpiLC-SOX2-S_master_peaks.bed | sortBed -i - > SOX2-S_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' SOX2-S_all_peaks.bed | sortBed -i - | mergeBed -i - > SOX2-S_all_peaks.over99nt.sorted.bed
+
+cat ESC-SOX2-G2_master_peaks.bed EpiLC-SOX2-G2_master_peaks.bed | sortBed -i - > SOX2-G2_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' SOX2-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > SOX2-G2_all_peaks.over99nt.sorted.bed
+
+
+cat ESC-NANOG-G1_master_peaks.bed EpiLC-NANOG-G1_master_peaks.bed | sortBed -i - > NANOG-G1_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' NANOG-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > NANOG-G1_all_peaks.over99nt.sorted.bed
+
+cat ESC-NANOG-S_master_peaks.bed EpiLC-NANOG-S_master_peaks.bed | sortBed -i - > NANOG-S_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' NANOG-S_all_peaks.bed | sortBed -i - | mergeBed -i - > NANOG-S_all_peaks.over99nt.sorted.bed
+
+cat ESC-NANOG-G2_master_peaks.bed EpiLC-NANOG-G2_master_peaks.bed | sortBed -i - > NANOG-G2_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' NANOG-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > NANOG-G2_all_peaks.over99nt.sorted.bed
+
+
+cat ESC-YAP1-G1_master_peaks.bed EpiLC-YAP1-G1_master_peaks.bed | sortBed -i - > YAP1-G1_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' YAP1-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > YAP1-G1_all_peaks.over99nt.sorted.bed
+
+cat ESC-YAP1-S_master_peaks.bed EpiLC-YAP1-S_master_peaks.bed | sortBed -i - > YAP1-S_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' YAP1-S_all_peaks.bed | sortBed -i - | mergeBed -i - > YAP1-S_all_peaks.over99nt.sorted.bed
+
+cat ESC-YAP1-G2_master_peaks.bed EpiLC-YAP1-G2_master_peaks.bed | sortBed -i - > YAP1-G2_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' YAP1-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > YAP1-G2_all_peaks.over99nt.sorted.bed
+
+
+cat ESC-MYC-G1_master_peaks.bed EpiLC-MYC-G1_master_peaks.bed | sortBed -i - > MYC-G1_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' MYC-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > MYC-G1_all_peaks.over99nt.sorted.bed
+
+cat ESC-MYC-S_master_peaks.bed EpiLC-MYC-S_master_peaks.bed | sortBed -i - > MYC-S_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' MYC-S_all_peaks.bed | sortBed -i - | mergeBed -i - > MYC-S_all_peaks.over99nt.sorted.bed
+
+cat ESC-MYC-G2_master_peaks.bed EpiLC-MYC-G2_master_peaks.bed | sortBed -i - > MYC-G2_all_peaks.bed
+awk '{if (($3-$2) >= 99) print $0}' MYC-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > MYC-G2_all_peaks.over99nt.sorted.bed
+
+rm *_all_peaks.bed
+```
+## Further Filter Consensus Peaks mm10 greater than 149bp peak size
+```bash
+nano filter_consensus_peaks_greater_than_149bp_mm10.sh
+
+cat ESC-OCT4-G1_master_peaks.bed EpiLC-OCT4-G1_master_peaks.bed | sortBed -i - > OCT4-G1_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' OCT4-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > OCT4-G1_all_peaks.over149nt.sorted.bed
+
+cat ESC-OCT4-S_master_peaks.bed EpiLC-OCT4-S_master_peaks.bed | sortBed -i - > OCT4-S_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' OCT4-S_all_peaks.bed | sortBed -i - | mergeBed -i - > OCT4-S_all_peaks.over149nt.sorted.bed
+
+cat ESC-OCT4-G2_master_peaks.bed EpiLC-OCT4-G2_master_peaks.bed | sortBed -i - > OCT4-G2_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' OCT4-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > OCT4-G2_all_peaks.over149nt.sorted.bed
+
+
+cat ESC-SOX2-G1_master_peaks.bed EpiLC-SOX2-G1_master_peaks.bed | sortBed -i - > SOX2-G1_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' SOX2-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > SOX2-G1_all_peaks.over149nt.sorted.bed
+
+cat ESC-SOX2-S_master_peaks.bed EpiLC-SOX2-S_master_peaks.bed | sortBed -i - > SOX2-S_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' SOX2-S_all_peaks.bed | sortBed -i - | mergeBed -i - > SOX2-S_all_peaks.over149nt.sorted.bed
+
+cat ESC-SOX2-G2_master_peaks.bed EpiLC-SOX2-G2_master_peaks.bed | sortBed -i - > SOX2-G2_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' SOX2-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > SOX2-G2_all_peaks.over149nt.sorted.bed
+
+
+cat ESC-NANOG-G1_master_peaks.bed EpiLC-NANOG-G1_master_peaks.bed | sortBed -i - > NANOG-G1_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' NANOG-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > NANOG-G1_all_peaks.over149nt.sorted.bed
+
+cat ESC-NANOG-S_master_peaks.bed EpiLC-NANOG-S_master_peaks.bed | sortBed -i - > NANOG-S_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' NANOG-S_all_peaks.bed | sortBed -i - | mergeBed -i - > NANOG-S_all_peaks.over149nt.sorted.bed
+
+cat ESC-NANOG-G2_master_peaks.bed EpiLC-NANOG-G2_master_peaks.bed | sortBed -i - > NANOG-G2_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' NANOG-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > NANOG-G2_all_peaks.over149nt.sorted.bed
+
+
+cat ESC-YAP1-G1_master_peaks.bed EpiLC-YAP1-G1_master_peaks.bed | sortBed -i - > YAP1-G1_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' YAP1-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > YAP1-G1_all_peaks.over149nt.sorted.bed
+
+cat ESC-YAP1-S_master_peaks.bed EpiLC-YAP1-S_master_peaks.bed | sortBed -i - > YAP1-S_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' YAP1-S_all_peaks.bed | sortBed -i - | mergeBed -i - > YAP1-S_all_peaks.over149nt.sorted.bed
+
+cat ESC-YAP1-G2_master_peaks.bed EpiLC-YAP1-G2_master_peaks.bed | sortBed -i - > YAP1-G2_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' YAP1-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > YAP1-G2_all_peaks.over149nt.sorted.bed
+
+
+cat ESC-MYC-G1_master_peaks.bed EpiLC-MYC-G1_master_peaks.bed | sortBed -i - > MYC-G1_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' MYC-G1_all_peaks.bed | sortBed -i - | mergeBed -i - > MYC-G1_all_peaks.over149nt.sorted.bed
+
+cat ESC-MYC-S_master_peaks.bed EpiLC-MYC-S_master_peaks.bed | sortBed -i - > MYC-S_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' MYC-S_all_peaks.bed | sortBed -i - | mergeBed -i - > MYC-S_all_peaks.over149nt.sorted.bed
+
+cat ESC-MYC-G2_master_peaks.bed EpiLC-MYC-G2_master_peaks.bed | sortBed -i - > MYC-G2_all_peaks.bed
+awk '{if (($3-$2) >= 149) print $0}' MYC-G2_all_peaks.bed | sortBed -i - | mergeBed -i - > MYC-G2_all_peaks.over149nt.sorted.bed
+
+rm *_all_peaks.bed
+```
 ## Generate Count Matrices mm39
 ```bash
 #!/bin/bash -l
@@ -1184,32 +1292,189 @@ for cell_line in "${cell_lines[@]}"; do
     done
 done
 ```
-## Generate Count Matrices mm10 --> RHH needs to be done
+## Generate Count Matrices mm10 peak size over 59bp
 ```bash
+nano Generate_Count_Matrices_mm10.sh
+
 #!/bin/bash -l
 #SBATCH --time=4:00:00
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=48gb
-#SBATCH --mail-type=FAIL
-#SBATCH --mail-user=phunold@uni-koeln.de
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=32gb
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
 
 cell_lines=("ESC" "EpiLC-d2")
 epitopes=("MYC" "SOX2" "NANOG" "OCT4" "YAP1")
 phases=("G1" "G2" "S")
-peak_dir="/scratch/phunold/ESC_EpiLC/bam/peaks/consensus/master_peaks"
-bam_dir="/scratch/phunold/ESC_EpiLC/bam"
-bedgraph_path="/scratch/phunold/ESC_EpiLC/bedgraph"
-
-module load bedtools/2.29.2
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_ESC_EpiLC_bulk_DynaTag_CUTnTag_ATAC"
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/bulk_DynaTag_CUTnTag_ESC_EpiLC_bam"
+bedgraph_path="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bedgraph/bedgraph_mm10"
 
 for cell_line in "${cell_lines[@]}"; do
     for epitope in "${epitopes[@]}"; do
         for phase in "${phases[@]}"; do
             peak_file="${peak_dir}/${epitope}-${phase}_all_peaks.over59nt.sorted.bed"
             if [ -f "$peak_file" ]; then
-                for f1 in "$bam_dir"/*"${cell_line}-${epitope}-${phase}"*.sorted.bam; do
-                    bedtools coverage -a "$peak_file" -b "$f1" -counts > "$bedgraph_path/$(basename ${f1%%.sorted.bam}).bedgraph"
-                    awk -v OFS='\t' '{print "chr"$1":"$2"-"$3, $4}' "$bedgraph_path/$(basename ${f1%%.sorted.bam}).bedgraph" > "$bedgraph_path/$(basename ${f1%%.sorted.bam})_counts.txt"
+                for f1 in "$bam_dir"/*"${cell_line}-${epitope}-${phase}"*_mm10_norm_clean.sort.bam; do
+                    bedtools coverage -a "$peak_file" -b "$f1" -counts > "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam}).bedgraph"
+                    awk -v OFS='\t' '{print $1":"$2"-"$3, $4}' "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam}).bedgraph" > "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam})_counts.txt"
+                done
+            fi
+        done
+    done
+done
+
+nano Generate_Count_Matrices_mm10_not.norm.sh
+
+#!/bin/bash -l
+#SBATCH --time=4:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32gb
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+cell_lines=("ESC" "EpiLC-d2")
+epitopes=("MYC" "SOX2" "NANOG" "OCT4" "YAP1")
+phases=("G1" "G2" "S")
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_ESC_EpiLC_bulk_DynaTag_CUTnTag_ATAC"
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/bulk_DynaTag_CUTnTag_ESC_EpiLC_bam"
+bedgraph_path="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bedgraph/bedgraph_mm10"
+for cell_line in "${cell_lines[@]}"; do
+    for epitope in "${epitopes[@]}"; do
+        for phase in "${phases[@]}"; do
+            peak_file="${peak_dir}/${epitope}-${phase}_all_peaks.over59nt.sorted.bed"
+            if [ -f "$peak_file" ]; then
+                for f1 in "$bam_dir"/*"${cell_line}-${epitope}-${phase}"*_mm10_same_clean.sort.bam; do
+                    bedtools coverage -a "$peak_file" -b "$f1" -counts > "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam}).bedgraph"
+                    awk -v OFS='\t' '{print $1":"$2"-"$3, $4}' "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam}).bedgraph" > "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam})_counts.txt"
+                done
+            fi
+        done
+    done
+done
+```
+## Generate Count Matrices mm10 peak size over 99bp
+```bash
+nano Generate_Count_Matrices_over99bp_mm10.sh
+
+#!/bin/bash -l
+#SBATCH --time=4:00:00
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=32gb
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+cell_lines=("ESC" "EpiLC-d2")
+epitopes=("MYC" "SOX2" "NANOG" "OCT4" "YAP1")
+phases=("G1" "G2" "S")
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_ESC_EpiLC_bulk_DynaTag_CUTnTag_ATAC"
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/bulk_DynaTag_CUTnTag_ESC_EpiLC_bam"
+bedgraph_path="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bedgraph/bedgraph_over99bp_mm10"
+
+for cell_line in "${cell_lines[@]}"; do
+    for epitope in "${epitopes[@]}"; do
+        for phase in "${phases[@]}"; do
+            peak_file="${peak_dir}/${epitope}-${phase}_all_peaks.over99nt.sorted.bed"
+            if [ -f "$peak_file" ]; then
+                for f1 in "$bam_dir"/*"${cell_line}-${epitope}-${phase}"*_mm10_norm_clean.sort.bam; do
+                    bedtools coverage -a "$peak_file" -b "$f1" -counts > "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam}).bedgraph"
+                    awk -v OFS='\t' '{print $1":"$2"-"$3, $4}' "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam}).bedgraph" > "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam})_counts.txt"
+                done
+            fi
+        done
+    done
+done
+
+nano Generate_Count_Matrices_over99bp_mm10_not.norm.sh
+
+#!/bin/bash -l
+#SBATCH --time=4:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32gb
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+cell_lines=("ESC" "EpiLC-d2")
+epitopes=("MYC" "SOX2" "NANOG" "OCT4" "YAP1")
+phases=("G1" "G2" "S")
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_ESC_EpiLC_bulk_DynaTag_CUTnTag_ATAC"
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/bulk_DynaTag_CUTnTag_ESC_EpiLC_bam"
+bedgraph_path="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bedgraph/bedgraph_over99bp_mm10"
+for cell_line in "${cell_lines[@]}"; do
+    for epitope in "${epitopes[@]}"; do
+        for phase in "${phases[@]}"; do
+            peak_file="${peak_dir}/${epitope}-${phase}_all_peaks.over99nt.sorted.bed"
+            if [ -f "$peak_file" ]; then
+                for f1 in "$bam_dir"/*"${cell_line}-${epitope}-${phase}"*_mm10_same_clean.sort.bam; do
+                    bedtools coverage -a "$peak_file" -b "$f1" -counts > "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam}).bedgraph"
+                    awk -v OFS='\t' '{print $1":"$2"-"$3, $4}' "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam}).bedgraph" > "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam})_counts.txt"
+                done
+            fi
+        done
+    done
+done
+```
+## Generate Count Matrices mm10 peak size over 149bp
+```bash
+nano Generate_Count_Matrices_over149bp_mm10.sh
+
+#!/bin/bash -l
+#SBATCH --time=4:00:00
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=32gb
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+cell_lines=("ESC" "EpiLC-d2")
+epitopes=("MYC" "SOX2" "NANOG" "OCT4" "YAP1")
+phases=("G1" "G2" "S")
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_ESC_EpiLC_bulk_DynaTag_CUTnTag_ATAC"
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/bulk_DynaTag_CUTnTag_ESC_EpiLC_bam"
+bedgraph_path="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bedgraph/bedgraph_over149bp_mm10"
+
+for cell_line in "${cell_lines[@]}"; do
+    for epitope in "${epitopes[@]}"; do
+        for phase in "${phases[@]}"; do
+            peak_file="${peak_dir}/${epitope}-${phase}_all_peaks.over149nt.sorted.bed"
+            if [ -f "$peak_file" ]; then
+                for f1 in "$bam_dir"/*"${cell_line}-${epitope}-${phase}"*_mm10_norm_clean.sort.bam; do
+                    bedtools coverage -a "$peak_file" -b "$f1" -counts > "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam}).bedgraph"
+                    awk -v OFS='\t' '{print $1":"$2"-"$3, $4}' "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam}).bedgraph" > "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam})_counts.txt"
+                done
+            fi
+        done
+    done
+done
+
+nano Generate_Count_Matrices_over149bp_mm10_not.norm.sh
+
+#!/bin/bash -l
+#SBATCH --time=4:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32gb
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+cell_lines=("ESC" "EpiLC-d2")
+epitopes=("MYC" "SOX2" "NANOG" "OCT4" "YAP1")
+phases=("G1" "G2" "S")
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_ESC_EpiLC_bulk_DynaTag_CUTnTag_ATAC"
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/bulk_DynaTag_CUTnTag_ESC_EpiLC_bam"
+bedgraph_path="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bedgraph/bedgraph_over149bp_mm10"
+for cell_line in "${cell_lines[@]}"; do
+    for epitope in "${epitopes[@]}"; do
+        for phase in "${phases[@]}"; do
+            peak_file="${peak_dir}/${epitope}-${phase}_all_peaks.over149nt.sorted.bed"
+            if [ -f "$peak_file" ]; then
+                for f1 in "$bam_dir"/*"${cell_line}-${epitope}-${phase}"*_mm10_same_clean.sort.bam; do
+                    bedtools coverage -a "$peak_file" -b "$f1" -counts > "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam}).bedgraph"
+                    awk -v OFS='\t' '{print $1":"$2"-"$3, $4}' "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam}).bedgraph" > "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam})_counts.txt"
                 done
             fi
         done
