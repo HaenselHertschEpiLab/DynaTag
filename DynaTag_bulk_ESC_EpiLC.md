@@ -1481,6 +1481,72 @@ for cell_line in "${cell_lines[@]}"; do
     done
 done
 ```
+## Generate Count Matrices mm10 ChIP-Atlas peaks
+```bash
+nano Generate_Count_Matrices_ChIP.Atlas.peaks_mm10.sh
+
+#!/bin/bash -l
+#SBATCH --time=4:00:00
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=32gb
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+cell_lines=("ESC" "EpiLC-d2")
+epitopes=("MYC" "SOX2" "NANOG" "OCT4" "YAP1")
+phases=("G1" "G2" "S")
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_ChIP.Atlas_TFs/3col.peaks_ChIP.Atlas_TFs"
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/bulk_DynaTag_CUTnTag_ESC_EpiLC_bam"
+bedgraph_path="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bedgraph/bedgraph_ChIP.Atlas.peaks_mm10"
+
+for cell_line in "${cell_lines[@]}"; do
+    for epitope in "${epitopes[@]}"; do
+        for phase in "${phases[@]}"; do
+            peak_file="${peak_dir}/merged_Oth.PSC.05.${epitope}.AllCell.bed"
+            if [ -f "$peak_file" ]; then
+                for f1 in "$bam_dir"/*"${cell_line}-${epitope}-${phase}"*_mm10_norm_clean.sort.bam; do
+                    bedtools coverage -a "$peak_file" -b "$f1" -counts > "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam}).bedgraph"
+                    awk -v OFS='\t' '{print $1":"$2"-"$3, $4}' "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam}).bedgraph" > "$bedgraph_path/$(basename ${f1%%_norm_clean.sort.bam})_counts.txt"
+                done
+            fi
+        done
+    done
+done
+
+nano Generate_Count_Matrices_ChIP.Atlas.peaks_mm10_not.norm.sh
+
+#!/bin/bash -l
+#SBATCH --time=4:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32gb
+
+# Activate the required environment
+conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env
+
+cell_lines=("ESC" "EpiLC-d2")
+epitopes=("MYC" "SOX2" "NANOG" "OCT4" "YAP1")
+phases=("G1" "G2" "S")
+peak_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/peaks/peaks_ChIP.Atlas_TFs/3col.peaks_ChIP.Atlas_TFs"
+bam_dir="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/alignment/bam/bulk_DynaTag_CUTnTag_ESC_EpiLC_bam"
+bedgraph_path="/scratch/rhaensel/DynaTag/ESC_EpiLC_DynaTag/bedgraph/bedgraph_ChIP.Atlas.peaks_mm10"
+for cell_line in "${cell_lines[@]}"; do
+    for epitope in "${epitopes[@]}"; do
+        for phase in "${phases[@]}"; do
+            peak_file="${peak_dir}/merged_Oth.PSC.05.${epitope}.AllCell.bed"
+            if [ -f "$peak_file" ]; then
+                for f1 in "$bam_dir"/*"${cell_line}-${epitope}-${phase}"*_mm10_same_clean.sort.bam; do
+                    bedtools coverage -a "$peak_file" -b "$f1" -counts > "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam}).bedgraph"
+                    awk -v OFS='\t' '{print $1":"$2"-"$3, $4}' "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam}).bedgraph" > "$bedgraph_path/$(basename ${f1%%_same_clean.sort.bam})_counts.txt"
+                done
+            fi
+        done
+    done
+done
+```
+
+
+
 ## Generate BigWig Files for optical inspection mm39
 ```bash
 
