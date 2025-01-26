@@ -1,4 +1,4 @@
-# Response_16
+# Response_16_17
 ## Response Fig. 2a Tornado plots of NANOG, SOX2 and OCT4 using matched ESC DynaTag, CUT&RUN and ChIP-seq data sets.
 ```bash
 # Performed with Galaxy Europe server
@@ -507,6 +507,12 @@ conda deactivate
 done
 
 echo "De novo motif discovery jobs submitted."
+```
+## Response Fig. 3 Tornado plots of NANOG, SOX2, OCT4, MYC and YAP1 using ESC DynaTag
+```bash
+# same script as Fig. 2a but in addiiton with Input files for MYC and YAP1
+# ESC-MYC-G1.mm10.merged_cpm.bw, ESC-MYC-G2.mm10.merged_cpm.bw, ESC-MYC-S.mm10.merged_cpm.bw, MYC_mm10_target.genes_10kb.bed
+# ESC-YAP1-G1.mm10.merged_cpm.bw, ESC-YAP1-G2.mm10.merged_cpm.bw, ESC-YAP1-S.mm10.merged_cpm.bw, YAP1_mm10_target.genes_10kb.bed
 ```
 
 
