@@ -66,6 +66,9 @@ This repository contains all code used to analyse and visualise the data from th
 
 # Rebuttal (Supplementary Information)
 
+## Response 16
+- [Response_16](https://github.com/HaenselHertschEpiLab/DynaTag/edit/main/Response_16.md)
+  
 ## Response 18
 - [Response_18_tornado.plots_snDynaTag.vs.bulkDynaTag_ESC.only](https://github.com/HaenselHertschEpiLab/DynaTag/blob/main/Response_18_tornado.plots_snDynaTag.vs.bulkDynaTag_ESC.only.md)
 
