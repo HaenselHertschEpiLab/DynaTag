@@ -1,5 +1,3 @@
-## Code needs to be adjusted to SCLC peaks
-
 ## Response 23 HOMER2 known motif analyses SCLC TFs using matched DynaTag peaks and ChIP-Atlas derived peaks.
 ```bash
 cat normalize_bed_files.sh
