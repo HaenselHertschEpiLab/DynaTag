@@ -1671,6 +1671,9 @@ sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools
 sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-H3K4me3-ICS*__mm10_norm_clean.sort.bam | samtools sort -o ESC-H3K4me3-ICS.mm10.merged.sorted.bam -"
 sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - ESC-H3K4me3-W300*__mm10_norm_clean.sort.bam | samtools sort -o ESC-H3K4me3-W300.mm10.merged.sorted.bam -"
 
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - bam_ATACESC-ATAC*_mm10_norm_clean.sort.bam | samtools sort -o ESC-ATAC.mm10.merged.sorted.bam -"
+sbatch -J merge_sort --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools merge - bam_ATACEpiLC-ATAC*_mm10_norm_clean.sort.bam | samtools sort -o EpiLC-ATAC.mm10.merged.sorted.bam -"
+
 for f1 in *merged.sorted.bam; do
 sbatch -J BAMindex --mem 8GB --wrap "conda activate /projects/ag-haensel/tools/.conda/envs/abc-model-env && samtools index $f1"
 done
