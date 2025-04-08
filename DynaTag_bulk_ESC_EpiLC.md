@@ -274,7 +274,7 @@ echo "Step 3: Downsampling BAM files..."
 for file in *.bam; do
     # Determine desired reads based on file name
     if [[ "$file" == *"ATAC"* ]]; then
-        desired_reads=15000000
+        desired_reads=7000000
     elif [[ "$file" == *"MYC"* || "$file" == *"YAP1"* ]]; then
         desired_reads=5000000
     elif [[ "$file" == *"OCT4"* ]]; then
