@@ -193,6 +193,7 @@ sbatch -J StoB --mem 32GB --cpus-per-task 8 --wrap "module load bio/SAMtools/1.1
 done
 ```
 ## Sort and Remove duplicates files mm10 GSM4291125_mESC_ChIPseq
+```bash
 #!/bin/bash
 
 # Directories
