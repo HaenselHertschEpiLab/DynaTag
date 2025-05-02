@@ -26,7 +26,7 @@ This repository contains all code used to analyse and visualise the data from th
 
 ## Figure 1
 
-- [Figure1B-CorrelationPlot](Figure_1_B_-_Correlation_Plot.md)
+- [Figure_1_B_-_CorrelationPlot](Figure_1_B_-_Correlation_Plot.md)
 - [Figure_1_C_&_Figure_SI_1_M](Figure_1_C_&_Figure_SI_1_M_-_FRiP_Score.md)
 - [Figure_1_D_-_IGV_Snapshot](Figure_1_D_-_IGV_Snapshot.md)
 - [Figure_1_E_-_MEME-ChIP_Motif_Prediction](Figure_1_E_-_MEME-ChIP_Motif_Prediction.md)
