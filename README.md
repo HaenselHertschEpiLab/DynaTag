@@ -37,6 +37,9 @@ This repository contains all code used to analyse and visualise the data from th
 - [Figure 2F GSEA](Figure_2F_GSEA.md)
 - [Figure 2G TOBIAS Motif Prediction](Figure_2G_TOBIAS_Motif_Prediction.md)
 
+## Figure 3
+- [Figure 3A IGV snDynaTag.md](Figure_3A_IGV_snDynaTag.md)
+
 ## Figure 2
 - [Figure_2_B_-_Differential_Binding_Analysis_DiffBind](Figure_2_B_-_Differential_Binding_Analysis_DiffBind.md)
 - [Figure_2_C_-_PlotProfile](Figure_2_C_-_PlotProfile.md)
