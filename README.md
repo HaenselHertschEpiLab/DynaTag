@@ -29,7 +29,7 @@ This repository contains all code used to analyse and visualise the data from th
 - [Figure_1C_&_Figure_SI1M](Figure_1_C_&_Figure_SI_1_M_-_FRiP_Score.md)
 - [Figure_1D_-_IGV_Snapshot](Figure_1_D_-_IGV_Snapshot.md)
 - [Figure_1E_-_DOA ESC](Figure_1_E_-_DOA_ESC.md)
-- [Figure_1F & SI2_-_Target Genes_Motifs ESC](Figure_1_F_&_SI_2_-_Target_Genes_Motifs_ESC.md)
+- [Figure_1F_& Figure_SI2_-_Target Genes_Motifs ESC](Figure_1F_&_SI2_-_Target_Genes_Motifs_ESC.md)
 
 ## Figure 2
 - [Figure 2A-C & SI 3B-D - DOA ESC vs EpiLC](Figure_2A-C_&_SI_3B-D_-_DOA_ESC_vs_EpiLC.md)
