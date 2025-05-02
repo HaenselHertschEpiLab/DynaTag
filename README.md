@@ -25,20 +25,26 @@ This repository contains all code used to analyse and visualise the data from th
 # Figures (Main)
 
 ## Figure 1
+- [Figure_1B_-_CorrelationPlot](Figure_1_B_-_Correlation_Plot.md)
+- [Figure_1C_&_Figure_SI1M](Figure_1_C_&_Figure_SI_1_M_-_FRiP_Score.md)
+- [Figure_1D_-_IGV_Snapshot](Figure_1_D_-_IGV_Snapshot.md)
+- [Figure_1E_-_DOA ESC](Figure_1_E_-_DOA_ESC.md)
+- [Figure_1F & SI2_-_Target Genes_Motifs ESC](Figure_1_F_&_SI_2_-_Target_Genes_Motifs_ESC.md)
 
-- [Figure_1_B_-_CorrelationPlot](Figure_1_B_-_Correlation_Plot.md)
-- [Figure_1_C_&_Figure_SI_1_M](Figure_1_C_&_Figure_SI_1_M_-_FRiP_Score.md)
-- [Figure_1_D_-_IGV_Snapshot](Figure_1_D_-_IGV_Snapshot.md)
-- [Figure_1_E_-_DOA ESC](Figure_1_E_-_DOA_ESC.md)
-- [Figure_1_F and SI 2_-_Target Genes_Motifs ESC](Figure_1_F_and_SI_2_-_Target_Genes_Motifs_ESC.md)
-- [Figure_1_G_&_Figure_SI_2_A_-_Differential_Binding_Analysis_edgeR](Figure_1_G_&_Figure_SI_2_A_-_Differential_Binding_Analysis_edgeR.md)
-- [Figure_1_H_-_TOBIAS_Motif_Prediction](Figure_1_H_-_TOBIAS_Motif_Prediction.md)
-- [Figure_1_I_-_Single-Cell_DynaTag](Figure_1_I_-_Single-Cell_DynaTag.md)
+## Figure 2
+- [Figure 2A-C & SI 3B-D - DOA ESC vs EpiLC](Figure_2A-C_&_SI_3B-D_-_DOA_ESC_vs_EpiLC.md)
 
 ## Figure 2
 - [Figure_2_B_-_Differential_Binding_Analysis_DiffBind](Figure_2_B_-_Differential_Binding_Analysis_DiffBind.md)
 - [Figure_2_C_-_PlotProfile](Figure_2_C_-_PlotProfile.md)
 - [Figure_2_D_-_Bubble_Plot](Figure_2_D_-_Bubble_Plot.md)
+
+
+  
+- [Figure_1_G_& Figure_1 -_Differential_Binding_Analysis_edgeR](Figure_1_G_&_Figure_SI_2_A_-_Differential_Binding_Analysis_edgeR.md)
+- [Figure_1_H_-_TOBIAS_Motif_Prediction](Figure_1_H_-_TOBIAS_Motif_Prediction.md)
+- [Figure_1_I_-_Single-Cell_DynaTag](Figure_1_I_-_Single-Cell_DynaTag.md)
+
 
 # Figures (Supplementary Information)
 
