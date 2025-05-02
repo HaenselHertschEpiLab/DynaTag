@@ -34,6 +34,7 @@ This repository contains all code used to analyse and visualise the data from th
 ## Figure 2
 - [Figure 2A-C & SI 3B-D - DOA ESC vs EpiLC](Figure_2A-C_&_SI_3B-D_-_DOA_ESC_vs_EpiLC.md)
 - [Figure 2D log2 RPKM ESC vs EpiLC](Figure_2D_log2_RPKM_ESC_vs_EpiLC.md)
+- [Figure_2F_-_GSEA](Figure_2F_-_GSEA.md)
 
 ## Figure 2
 - [Figure_2_B_-_Differential_Binding_Analysis_DiffBind](Figure_2_B_-_Differential_Binding_Analysis_DiffBind.md)
@@ -54,7 +55,7 @@ This repository contains all code used to analyse and visualise the data from th
 - [Figure_SI_1_D_&_SI_3_B_-_Target_Gene_Enrichment](Figure_SI_1_D_&_SI_3_B_-_Target_Gene_Enrichment.md)
 
 ## Figure SI 2 
-- [Figure_SI_2_C_-_GSEA](Figure_SI_2_C_-_GSEA.md)
+- [Figure_2F_-_GSEA](Figure_2F_-_GSEA.md)
 
 ## Figure SI 3 
 - [Figure_SI_3_A_-_FRiP_Score](Figure_SI_3_A_-_FRiP_Score.md)
