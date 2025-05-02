@@ -1,4 +1,3 @@
-# Preprocessing in DynaTag_bulk_ESC_EpiLC.md
 # FRiP Score
 ## Calculate FRiP Scores
 ```bash
