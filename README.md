@@ -25,11 +25,11 @@ This repository contains all code used to analyse and visualise the data from th
 # Figures (Main)
 
 ## Figure 1
-- [Figure 1B Correlation Plot](Figure_1_B_-_Correlation_Plot.md)
-- [Figure 1C & Figure SI 1M](Figure_1_C_&_Figure_SI_1_M_-_FRiP_Score.md)
-- [Figure 1D IGV Snapshot](Figure_1_D_-_IGV_Snapshot.md)
-- [Figure 1E DOA ESC](Figure_1_E_-_DOA_ESC.md)
-- [Figure 1F & SI 2 Target Genes Motifs ESC](Figure_1F_&_SI2_-_Target_Genes_Motifs_ESC.md)
+- [Figure 1B Correlation Plot](Figure_1B_Correlation_Plot.md)
+- [Figure 1C & Figure SI 1M](Figure_1C_&_SI_1M_FRiP_Score.md)
+- [Figure 1D IGV Snapshot](Figure_1D_IGV_Snapshot.md)
+- [Figure 1E DOA ESC](Figure_1E_DOA_ESC.md)
+- [Figure 1F & SI 2 Target Genes Motifs ESC](Figure_1F_&_SI_2_Target_Genes_Motifs_ESC.md)
 
 ## Figure 2
 - [Figure 2A-C & SI 3B-D - DOA ESC vs EpiLC](Figure_2A-C_&_SI_3B-D_-_DOA_ESC_vs_EpiLC.md)
