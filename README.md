@@ -40,6 +40,8 @@ This repository contains all code used to analyse and visualise the data from th
 ## Figure 3
 - [Figure 3A IGV snDynaTag.md](Figure_3A_IGV_snDynaTag.md)
 - [Figure 3B Correlation Plot](Figure_3B_Correlation_Plot.md)
+- [Figure 3C-D DOA snDynaTag ESC vs EpiLC](Figure_3C-D_DOA_snDynaTag_ESC_vs_EpiLC.md)
+  
 ## Figure 2
 - [Figure_2_B_-_Differential_Binding_Analysis_DiffBind](Figure_2_B_-_Differential_Binding_Analysis_DiffBind.md)
 - [Figure_2_C_-_PlotProfile](Figure_2_C_-_PlotProfile.md)
