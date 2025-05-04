@@ -48,36 +48,18 @@ This repository contains all code used to analyse and visualise the data from th
 - [Figure 4C PlotProfile SCLC](Figure_4C_PlotProfile_SCLC.md)
 - [Figure 4D Bubble Plot SCLC](Figure_4D_Bubble_Plot_SCLC.md)
 
-
-- [Figure_1_G_& Figure_1 -_Differential_Binding_Analysis_edgeR](Figure_1_G_&_Figure_SI_2_A_-_Differential_Binding_Analysis_edgeR.md)
-
-- [Figure_1_I_-_Single-Cell_DynaTag](Figure_1_I_-_Single-Cell_DynaTag.md)
-
-
 # Figures (Additional Supplementary Information)
 
-## Figure SI 1
-- [Figure_SI_1_B_-_Correlation_Plot](Figure_SI_1_B_-_Correlation_Plot.md)
-- [Figure_SI_1_D_&_SI_3_B_-_Target_Gene_Enrichment](Figure_SI_1_D_&_SI_3_B_-_Target_Gene_Enrichment.md)
-
-## Figure SI 2 
-- [Figure_2F_-_GSEA](Figure_2F_-_GSEA.md)
-
-## Figure SI 3 
-- [Figure_SI_3_A_-_FRiP_Score](Figure_SI_3_A_-_FRiP_Score.md)
-
-## Figure SI 4
-- [Figure_SI_4_B_-_Single-Cell_RNA-seq_QC](Figure_SI_4_B_-_Single-Cell_RNA-seq_QC.md)
-- [Figure_SI_4_C_&_D_-_Single-Cell_RNA-seq_Gene_Expression](Figure_SI_4_C_&_D_-_Single-Cell_RNA-seq_Gene_Expression.md)
-- [Figure_SI_4_E_-_Single-Cell_RNA-seq_Cell_Types](Figure_SI_4_E_-_Single-Cell_RNA-seq_Cell_Types.md)
 ## Figure SI 5
+- [Figure SI 5B Single-Cell RNA-seq QC SCLC](Figure_SI_5B_Single-Cell_RNA-seq_QC_SCLC.md)
+- [Figure SI 5E-F Single-Cell RNA-seq Gene Expression_SCLC](Figure_SI_5E-F_Single-Cell_RNA-seq_Gene_Expression_SCLC.md)
+- [Figure SI 5G Single-Cell RNA-seq Cell Types SCLC](Figure_SI_5G_Single-Cell_RNA-seq_Cell_Types_SCLC.md)
 
-
-## Figure SI 6 
-- [Figure_SI_6_A_-_PCA](Figure_SI_6_A_-_PCA.md)
-- [Figure_SI_6_B_-_Differential_Expression_Analysis_DESeq2](Figure_SI_6_B_-_Differential_Expression_Analysis_DESeq2.md)
-- [Figure_SI_6_C_-_Heat_Map](Figure_SI_6_C_-_Heat_Map.md)
-- [Figure_SI_6_D_-_GSEA](Figure_SI_6_D_-_GSEA.md)
+## Figure SI 7 
+- [Figure_SI_7A_PCA_SCLC](Figure_SI_7A_PCA_SCLC.md)
+- [Figure SI 7B Differential Expression Analysis DESeq2 SCLC](Figure_SI_7B_Differential_Expression_Analysis_DESeq2_SCLC.md)
+- [Figure SI 7C Heatmap SCLC](Figure_SI_7C_Heatmap_SCLC.md)
+- [Figure SI 7D GSEA SCLC](Figure_SI_7D_GSEA_SCLC.md)
 
 # Rebuttal (Supplementary Information)
 
