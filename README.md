@@ -1,5 +1,5 @@
-# DynaTag for efficient profiling of transcription factors in small samples and single cells
-This repository contains all code used to analyse and visualise the data from the DynaTag project.
+# DynaTag profiles dynamics of transcription factor-DNA binding for low-input samples and at single-cell resolution
+This repository contains all code used to analyse and visualise the data of the DynaTag project.
 
 # Code and Data Analysis
 
