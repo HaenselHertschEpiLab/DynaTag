@@ -1,0 +1,31 @@
+#!/bin/bash -l
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=256000mb
+#SBATCH --time=1440:00
+#SBATCH --mail-user=nheramva@uni-koeln.de
+
+# input folder
+INPUT_DIR="/projects/cangen/Nadia/Hansel_Hertsch_lab/snDynaTag_mESC_EpiLC/20241203_mESC_EpiLC_fastq/outs/aligment_bam"
+INPUT2_DIR="/projects/cangen/Nadia/Hansel_Hertsch_lab/snDynaTag_mESC_EpiLC/20241203_mESC_EpiLC_fastq/outs/aggregated_BAM_all/cleaned_peaks_all/snDynaTag_mm10_ESC_EpiLC_filtered_1000_score_peaks_per_TF_merged_binned"
+
+#output folder
+#OUTPUT_DIR="/projects/cangen/Nadia/Hansel_Hertsch_lab/snDynaTag_mESC_EpiLC/20241203_mESC_EpiLC_fastq/outs/aggregated_BAM_all/cleaned_peaks_all/snDynaTag_mm10_ESC_EpiLC_filtered_1000_score_peaks_per_TF_merged_binned/bedgraph"
+OUTPUT_DIR="/scratch/nadia/DynaTag_binned/bedgraph"
+mkdir -p "$OUTPUT_DIR"
+
+#OUTPUT2_DIR="/projects/cangen/Nadia/Hansel_Hertsch_lab/snDynaTag_mESC_EpiLC/20241203_mESC_EpiLC_fastq/outs/aggregated_BAM_all/cleaned_peaks_all/snDynaTag_mm10_ESC_EpiLC_filtered_1000_score_peaks_per_TF_merged_binned/txt"
+OUTPUT2_DIR="/scratch/nadia/DynaTag_binned/txt"
+mkdir -p "$OUTPUT2_DIR"
+
+# Load required modules
+module load bio/BEDTools/2.31.0-GCC-12.3.0
+
+for f1 in "$INPUT_DIR"/R*.bam; do
+    out_name="$(basename "${f1}" _L001_bowtie2.mapped.bam).bedgraph"
+    bedtools coverage -a "$INPUT2_DIR"/master_peakCleaned_60nt_binned.bed -b "${f1}" -counts > "$OUTPUT_DIR"/"${out_name}"
+
+    base_name="$(basename "${out_name}" .bedgraph)"
+    txt_file="${base_name}.txt"
+    awk '{print $1":"$2"-"$3 "\t" $4}' "$OUTPUT_DIR"/"${out_name}" > "$OUTPUT2_DIR"/"${txt_file}"
+done
+
