@@ -61,18 +61,6 @@ This repository contains all code used to analyse and visualise the data from th
 - [Figure SI 7C Heatmap SCLC](Figure_SI_7C_Heatmap_SCLC.md)
 - [Figure SI 7D GSEA SCLC](Figure_SI_7D_GSEA_SCLC.md)
 
-# Rebuttal (Supplementary Information)
-
-## Response 16
-- [Response_16 and 17 ChIP-seq vs CUT&RUN vs DynaTag ](https://github.com/HaenselHertschEpiLab/DynaTag/edit/main/Response_16_17.md)
-  
-## Response 18
-- [Response_18_tornado.plots_snDynaTag.vs.bulkDynaTag_ESC.only](https://github.com/HaenselHertschEpiLab/DynaTag/blob/main/Response_18_tornado.plots_snDynaTag.vs.bulkDynaTag_ESC.only.md)
-
-## Response 23
-- [Response_23_Homer2 motif anaysis of SCLC TFs](Response_23.md)
-
-
 
 
 
