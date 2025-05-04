@@ -48,20 +48,13 @@ This repository contains all code used to analyse and visualise the data from th
 - [Figure 4C PlotProfile SCLC](Figure_4C_PlotProfile_SCLC.md)
 - [Figure 4D Bubble Plot SCLC](Figure_4D_Bubble_Plot_SCLC.md)
 
-  
-## Figure 2
-- [Figure_2_B_-_Differential_Binding_Analysis_DiffBind](Figure_2_B_-_Differential_Binding_Analysis_DiffBind.md)
-- [Figure_2_C_-_PlotProfile](Figure_2_C_-_PlotProfile.md)
-- [Figure_2_D_-_Bubble_Plot](Figure_2_D_-_Bubble_Plot.md)
 
-
-  
 - [Figure_1_G_& Figure_1 -_Differential_Binding_Analysis_edgeR](Figure_1_G_&_Figure_SI_2_A_-_Differential_Binding_Analysis_edgeR.md)
 
 - [Figure_1_I_-_Single-Cell_DynaTag](Figure_1_I_-_Single-Cell_DynaTag.md)
 
 
-# Figures (Supplementary Information)
+# Figures (Additional Supplementary Information)
 
 ## Figure SI 1
 - [Figure_SI_1_B_-_Correlation_Plot](Figure_SI_1_B_-_Correlation_Plot.md)
