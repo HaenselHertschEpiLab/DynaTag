@@ -7,7 +7,7 @@ This repository contains all code used to analyse and visualise the data from th
 - [DynaTag_bulk_ESC_EpiLC](DynaTag_bulk_ESC_EpiLC.md)
 
 ## Data Preprocessing (single-cell DynaTag)
-- [DynaTag_sc_ESC](DynaTag_sc_ESC.md)
+- [DynaTag_single-cell_DynaTag_ESC_EpiLC](DynaTag_single-cell_DynaTag_ESC_EpiLC.md)
 
 ## Data Preprocessing (bulk ESC and EpiLC RNA-seq)
 
@@ -25,7 +25,7 @@ This repository contains all code used to analyse and visualise the data from th
 # Figures (Main)
 
 ## Figure 1
-- [Figure 1B Correlation Plot](Figure_1B_Correlation_Plot.md)
+- [Figure 1B & SI 1L Correlation Plot](Figure_1B_&_SI_1L_Correlation_Plot.md)
 - [Figure 1C & Figure SI 1M](Figure_1C_&_SI_1M_FRiP_Score.md)
 - [Figure 1D IGV Snapshot](Figure_1D_IGV_Snapshot.md)
 - [Figure 1E DOA ESC](Figure_1E_DOA_ESC.md)
