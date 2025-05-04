@@ -47,6 +47,7 @@ This repository contains all code used to analyse and visualise the data of the 
 - [Figure 4B & SI 6 DOA SCLC](Figure_4B_&_SI_6_DOA_SCLC.md)
 - [Figure 4C PlotProfile SCLC](Figure_4C_PlotProfile_SCLC.md)
 - [Figure 4D Bubble Plot SCLC](Figure_4D_Bubble_Plot_SCLC.md)
+- [Figure 4E Heatmap P53 SCLC](Figure_4E_Heatmap_P53_SCLC.md)
 
 # Figures (Additional Supplementary Information)
 
