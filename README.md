@@ -57,7 +57,7 @@ This repository contains all code used to analyse and visualise the data of the 
 - [Figure SI 5G Single-Cell RNA-seq Cell Types SCLC](Figure_SI_5G_Single-Cell_RNA-seq_Cell_Types_SCLC.md)
 
 ## Figure SI 7 
-- [Figure_SI_7A_PCA_SCLC](Figure_SI_7A_PCA_SCLC.md)
+- [Figure SI 7A_PCA_SCLC](Figure_SI_7A_PCA_SCLC.md)
 - [Figure SI 7B Differential Expression Analysis DESeq2 SCLC](Figure_SI_7B_Differential_Expression_Analysis_DESeq2_SCLC.md)
 - [Figure SI 7C Heatmap SCLC](Figure_SI_7C_Heatmap_SCLC.md)
 - [Figure SI 7D GSEA SCLC](Figure_SI_7D_GSEA_SCLC.md)
