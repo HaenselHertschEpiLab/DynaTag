@@ -273,6 +273,7 @@ conda deactivate
 ## Load Packages
 ```R
 library(Seurat)
+library(SeuratWrappers)
 library(dplyr)
 library(Matrix)
 library(ggplot2)
@@ -281,6 +282,11 @@ library(viridis)
 library(reshape2)
 library(ComplexHeatmap)
 library(DESeq2)
+library(stringr)
+library(purrr)
+library(scclusteval)
+library(tidyr)
+library(parallel)
 ```
 ## Convenience Functions
 ```R
@@ -326,56 +332,178 @@ SCLC_PDX_CHEM_2$treatment_status <- "Chemotherapy"
 # Merge the samples into one Seurat object
 merged_object <- merge(SCLC_PDX_CTRL_1, y = list(SCLC_PDX_CTRL_2, SCLC_PDX_CHEM_1, SCLC_PDX_CHEM_2), add.cell.ids = c("SCLC_PDX_CTRL_1", "SCLC_PDX_CTRL_2","SCLC_PDX_CHEM_1", "SCLC_PDX_CHEM_2"))
 ```
-## Dimensionality Reduction
+## Pre-processing
 ```R
-# Re-identify Variable Features
-features_SCLC_PDX_CTRL_1 <- VariableFeatures(SCLC_PDX_CTRL_1)
-features_SCLC_PDX_CTRL_2 <- VariableFeatures(SCLC_PDX_CTRL_2)
-features_SCLC_PDX_CHEM_1 <- VariableFeatures(SCLC_PDX_CHEM_1)
-features_SCLC_PDX_CHEM_2 <- VariableFeatures(SCLC_PDX_CHEM_2)
+# Predict cell cycle 
+merged_object[["RNA"]] <- JoinLayers(merged_object[["RNA"]])
+merged_object <- NormalizeData(merged_object)
+s.genes <- cc.genes$s.genes
+g2m.genes <- cc.genes$g2m.genes
+merged_object<-CellCycleScoring(merged_object, g2m.features=g2m.genes[g2m.genes %in% rownames(merged_object)], s.features=s.genes[s.genes %in% rownames(merged_object)], set.ident = FALSE)
+merged_object@meta.data$CC.Difference <- merged_object@meta.data$S.Score - merged_object@meta.data$G2M.Score
 
-all_features <- Reduce(union, list(features_SCLC_PDX_CTRL_1, features_SCLC_PDX_CTRL_2, features_SCLC_PDX_CHEM_1, features_SCLC_PDX_CHEM_2))
-VariableFeatures(merged_object) <- all_features
+# Split the Seurat object by sample for preprocessing
+merged_object[["RNA"]] <- split(merged_object[["RNA"]], f = merged_object$orig.ident)
 
-# Set the Default Assay (if you are working with SCT assay)
-DefaultAssay(merged_object) <- "SCT"
+# QC plots
+pdf('VlnPlot.data_nGene_filtered.pdf')
+VlnPlot(merged_object, features="nFeature_RNA", pt.size = 0.3, group.by= "orig.ident")
+dev.off()
+pdf('VlnPlot.data_nUMI_filtered.pdf')
+VlnPlot(merged_object, c("nCount_RNA"), pt.size = 0.3, group.by= "orig.ident")
+dev.off()
+merged_object <- PercentageFeatureSet(merged_object, pattern = "^MT-", col.name = "percent.mito")
+pdf('ViolinPlots.expr_percMito_filtered.pdf')
+VlnPlot(merged_object, c("percent.mito"),  pt.size = 0.3, group.by= "orig.ident")
+dev.off()
+merged_object <- PercentageFeatureSet(merged_object, pattern = "^RPL", col.name = "percent.ribo")
+pdf('ViolinPlots.expr_percRibo_filtered.pdf')
+VlnPlot(merged_object, c("percent.ribo"),  pt.size = 0.3, group.by= "orig.ident")
+dev.off()
 
-# Run PCA on merged data (required before Harmony)
-merged_object <- RunPCA(merged_object, features = VariableFeatures(object = merged_object))
+# Filter cells 
+merged_object <- subset(merged_object, subset= nFeature_RNA > 500 & nCount_RNA > 1000 & nCount_RNA < 100000 )
+merged_object <- subset(merged_object, subset= percent.mito < 10)
 
-
-# Run ElbowPlot on Harmony-adjusted data
-plot <- ElbowPlot(merged_object,ndims = 50)
-plot
-SaveFigure(plot, "PC_elbow_plot_integrated_SCLC_PDX", width = 8, height = 10)
-
-# Run UMAP on Harmony-adjusted PCA
-merged_object <- RunUMAP(merged_object, reduction = "pca", dims = 1:30)
-
-# Find clusters
-merged_object <- FindNeighbors(merged_object, reduction = "pca", dims = 1:30)
-merged_object <- FindClusters(merged_object, resolution = 0.4)
-colours <- DiscretePalette(10, palette = "alphabet", shuffle = FALSE)
-DimPlot(merged_object, group.by = "orig.ident", cols = colours) & NoAxes() 
-DimPlot(merged_object, group.by = "seurat_clusters", cols = colours, label = T) & NoAxes() & NoLegend()
-DimPlot(merged_object, group.by = "treatment_status", cols = colours) & NoAxes()
 ```
-## Assing Cell Types
+## Integration and clustering
 ```R
-cell_types <- c("SCLC_0", 
-                "SCLC_1", 
-                "SCLC_2",
-                "SCLC_3",
-                "SCLC_4",
-                "SCLC_5",
-                "Immune Cells",
-                "SCLC_7",
-                "SCLC_8",
-                "Stromal Cells")
-names(cell_types) <- levels(merged_object)
-merged_object <- RenameIdents(merged_object, cell_types)
-CT <- DimPlot(merged_object, cols = colours, label = T) & NoAxes() & NoLegend()
-SaveFigure(CT, "DimPlot_CellTypes_SCLC_PDX", width = 8, height = 10)
+# Normalization and PCA
+merged_object <- SCTransform(merged_object, vars.to.regress = c("percent.mito"))
+merged_object <- RunPCA(merged_object, pcs.compute=50, assay = "SCT")
+# Evaluate relevant PC
+pdf('ElbowPlot.pdf')
+ElbowPlot(merged_object, ndims = 50)
+dev.off()
+
+# RPCA integration ans clustering 
+merged_object <- IntegrateLayers(object = merged_object,method = RPCAIntegration,normalization.method = "SCT",new.reduction = "integrated.rpca",verbose = F)
+merged_object <- FindNeighbors(merged_object, dims = 1:30, reduction = "integrated.rpca")
+merged_object <- FindClusters(merged_object, resolution = c(0.2,0.3,0.4,0.5))
+merged_object <- RunUMAP(merged_object, reduction = "integrated.rpca", dims = 1:30, reduction.name = "umap")
+
+pdf('umap_plot_clusters_rpca.pdf')
+for ( i in colnames(merged_object@meta.data)[grep('SCT_snn',colnames(merged_object@meta.data))]){
+  Idents(merged_object) <- i
+  print(DimPlot(merged_object, reduction = "umap",raster=FALSE, label=TRUE) + ggtitle(paste(i)))
+}
+dev.off()
+
+```
+## Cluster stability analysis
+```R
+# Cluster stability analysis (for each resolution)
+obj<-merged_object
+obj<-AddMetaData(obj, merged_object@meta.data[,grep("SCT_snn_res", colnames(merged_object@meta.data))])
+resolutions <- colnames(merged_object@meta.data)[grep("SCT_snn_res", colnames(merged_object@meta.data))]
+# This function re-compute integration and clustering after each subsampling
+performSubsamplingAndClustering <- function(obj, resolutions, nPCs, perc.sub=0.8, n_subsampling=20){
+  subsample_idents<-Reduce( "bind_rows", lapply(resolutions, function(x){
+    res<-str_remove(x,"SCT_snn_res.")
+    out<-mclapply(c(1:n_subsampling), function(y){
+      rand_test <- RandomSubsetData(obj, rate=perc.sub)
+      rand_test_rpca <- IntegrateLayers(object = rand_test,method = RPCAIntegration,normalization.method = "SCT",new.reduction = "integrated.rpca",verbose = F)
+      rand_test_rpca <- FindNeighbors(rand_test_rpca, dims = 1:nPCs, verbose = FALSE,reduction = "integrated.rpca")
+      eval(parse(text=paste0("rand_test_rpca <- FindClusters(rand_test_rpca, resolution = ",res,", verbose = FALSE)")))
+      recluster_ident<-rand_test_rpca@meta.data[,x]
+      names(recluster_ident) <- rownames(rand_test_rpca@meta.data)
+      original_ident<-obj@meta.data[rownames(rand_test_rpca@meta.data),x]
+      names(original_ident) <- rownames(rand_test_rpca@meta.data)
+      return(list(recluster_ident,original_ident))
+    },mc.cores = 6)
+    recluster_ident <-list()
+    original_ident <-list()
+    for(i in 1:n_subsampling){
+      recluster_ident[[i]]=out[[i]][[1]]
+      original_ident[[i]]=out[[i]][[2]]
+    }
+    data<-tibble(resolution=res, recluster_ident=recluster_ident, original_ident=original_ident,round=as.character(c(0:(n_subsampling-1))))
+    return(data)
+  }))
+  return(subsample_idents)
+}
+subsample_idents <- performSubsamplingAndClustering(obj, resolutions,nPCs=30)
+
+# Find most stable clustering
+subsample_idents_list<- subsample_idents %>% group_by(resolution) %>%  nest()
+stable_cl_res0.2<-AssignStableCluster(subsample_idents_list$data[[1]]$original_ident,subsample_idents_list$data[[1]]$recluster_ident,method = "jaccard_median",jaccard_cutoff = 0.75)
+stable_cl_res0.3<-AssignStableCluster(subsample_idents_list$data[[2]]$original_ident,subsample_idents_list$data[[2]]$recluster_ident,method = "jaccard_median",jaccard_cutoff = 0.75)
+stable_cl_res0.4<-AssignStableCluster(subsample_idents_list$data[[3]]$original_ident,subsample_idents_list$data[[3]]$recluster_ident,method = "jaccard_median",jaccard_cutoff = 0.75)
+stable_cl_res0.5<-AssignStableCluster(subsample_idents_list$data[[4]]$original_ident,subsample_idents_list$data[[4]]$recluster_ident,method = "jaccard_median",jaccard_cutoff = 0.75)
+
+barplot_data<-data.frame(fraction = c(sum(stable_cl_res0.2$stable_cluster)/length(stable_cl_res0.2$stable_cluster),sum(stable_cl_res0.3$stable_cluster)/length(stable_cl_res0.3$stable_cluster),sum(stable_cl_res0.4$stable_cluster)/length(stable_cl_res0.4$stable_cluster),sum(stable_cl_res0.5$stable_cluster)/length(stable_cl_res0.5$stable_cluster)), resolution=c("res0.2","res0.3","res0.4","res0.5"))
+pdf('Barplot_fraction_of_stable_clusters.pdf')
+ggplot(data=barplot_data, aes(x=resolution, y=fraction)) + geom_bar(stat="identity", fill="steelblue") + ylim(0,1) + ylab("Fraction of stable clusters") + xlab("Resolution") + theme_minimal() + geom_text(aes(label=c("n = 8","n = 9","n = 11","n = 11")), vjust=1.6, color="white", size=5)
+dev.off()
+
+JI_res0.2<-AssignHighestJaccard(subsample_idents_list$data[[1]]$data[[1]]$original_ident, subsample_idents_list$data[[1]]$data[[1]]$recluster_ident)
+JI_res0.3<-AssignHighestJaccard(subsample_idents_list$data[[2]]$data[[1]]$original_ident, subsample_idents_list$data[[2]]$data[[1]]$recluster_ident)
+JI_res0.4<-AssignHighestJaccard(subsample_idents_list$data[[3]]$data[[1]]$original_ident, subsample_idents_list$data[[3]]$data[[1]]$recluster_ident)
+JI_res0.5<-AssignHighestJaccard(subsample_idents_list$data[[4]]$data[[1]]$original_ident, subsample_idents_list$data[[4]]$data[[1]]$recluster_ident)
+data_boxplot <- data.frame(median_JI = c(apply(JI_res0.2,2,median),apply(JI_res0.3,2,median),apply(JI_res0.4,2,median),apply(JI_res0.5,2,median)), Resolution=c(rep("res0.2",length(apply(JI_res0.2,2,median))),rep("res0.3",length(apply(JI_res0.3,2,median))),rep("res0.4",length(apply(JI_res0.4,2,median))),rep("res0.5",length(apply(JI_res0.5,2,median)))))
+pdf('Boxplot_median_JI.pdf')
+ggplot(data_boxplot, aes(x=Resolution, y=median_JI)) + geom_boxplot(outliers = FALSE, color="steelblue") + geom_jitter(shape=16, position=position_jitter(0.2)) + ylab("Clusters median JI") + geom_hline(yintercept = 0.75,colour="red3",size=0.8,linetype=8 ) + theme_minimal()
+dev.off()
+
+pdf('Jaccard_plot_res0.4_stable_cluster.pdf')
+JaccardRainCloudPlot(idents1 = subsample_idents_list$data[[3]]$original_ident,
+                     idents2 = subsample_idents_list$data[[3]]$recluster_ident) + 
+  geom_hline(yintercept = c(0.75), linetype = 2) + geom_hline(yintercept = c(0.75), linetype = 2,color="red2") +
+  xlab("clusters res=0.4") 
+dev.off()
+
+```
+## Cluster identity
+```R
+# After evaluating cluster stability we keep res 0.4 (merging clusters 3 and 11, because splitting is not stable)
+merged_object$final_clusters <- merged_object$SCT_snn_res.0.4
+merged_object@meta.data[which(merged_object@meta.data$final_clusters == 11),'final_clusters'] <- 3
+pdf('umap_plot_final_clusters_rpca.pdf')
+Idents(merged_object) <- 'final_clusters'
+DimPlot(merged_object, reduction = "umap",raster=FALSE, label=FALSE) 
+dev.off()
+
+## Compute cluster markers
+merged_object<- PrepSCTFindMarkers(merged_object, assay = "SCT", verbose = TRUE)
+Idents(merged_object) <- 'final_clusters'
+DefaultAssay(merged_object) <- 'SCT'
+MarkersAll <- Reduce("rbind",lapply(levels(Idents(merged_object)), function(cluster) {
+  Markers <- FindMarkers(merged_object, ident.1 = cluster, ident.2 = NULL, only.pos = TRUE, min.pct = 0.2, logfc.threshold = 1, pseudocount.use = 0.2,assay = "SCT")
+  Markers <- Markers[which(Markers$p_val_adj < 0.01),]
+  Markers <- Markers[order(Markers$avg_log2FC, decreasing = TRUE),]
+  Markers$gene <- rownames(Markers)
+  Markers$cluster <- rep(paste0(cluster),nrow(Markers))
+  print(nrow(Markers))
+  return(Markers)
+}))
+
+# Prepare dot plots for cluster markers
+mito_genes <- grep(pattern = "^MT", x = rownames(merged_object), value = TRUE)
+markers<-MarkersAll[!(MarkersAll$gene %in% mito_genes),]
+markers$logFC <-markers$avg_log2FC
+markers<-markers %>% group_by(cluster) %>% top_n(n = 10)
+markers<- markers[order(as.numeric(markers$cluster), decreasing = FALSE),]
+p <- DotPlot(object = merged_object, assay="SCT", features=unique(markers$gene), scale=TRUE,idents = c(0:10),dot.scale = 9) + ylab("Clusters") + scale_colour_gradient2(low = "blue2", mid = "gray90", high = "red2", midpoint=0) + scale_size_continuous(limits = c(0, 100))+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
+pdf('DotPlot_final_clusters_top10_markers_rank_avg_logFC.pdf', width=20)
+print(p)
+dev.off()
+
+# UMAP plots with gene expresssion
+pdf('umap_plot_Ptprc_expr.pdf')
+print(FeaturePlot(merged_object, features = "Ptprc", pt.size = 0.4,slot = "data", order=TRUE) + scale_colour_gradientn(colours = c('grey90',"orange","red4")))
+dev.off()
+
+pdf('umap_plot_Col1a2_expr.pdf')
+print(FeaturePlot(merged_object, features = "Col1a2", pt.size = 0.4,slot = "data", order=TRUE) + scale_colour_gradientn(colours = c('grey90',"orange","red4")))
+dev.off()
+
+## Plot for TFs
+TF_names<-c("ASCL1","YAP1","TP53","TP73","FOXA1","NFIB","NRF1","SP2")
+pdf('umap_plot_TFs_expr.pdf')
+for (gene in TF_names){
+  print(FeaturePlot(merged_object, features = gene, pt.size = 0.4,slot = "data", order=TRUE) + scale_colour_gradientn(colours = c('grey90',"orange","red4")))
+}
+dev.off()
 ```
 ## Remove non-cancerous cells
 ```R
