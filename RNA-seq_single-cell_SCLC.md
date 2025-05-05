@@ -508,7 +508,7 @@ dev.off()
 ## Remove non-cancerous cells
 ```R
 SCLC_clusters <- c("0","1","2","3","4","5","7","8")
-SCLC_object <- subset(x = merged_object, subset = seurat_clusters %in% SCLC_clusters)
+SCLC_object <- subset(x = merged_object, subset = final_clusters %in% SCLC_clusters)
 DimPlot(SCLC_object, cols = colours, label = T, ) & NoAxes() & NoLegend()
 fp <- FeaturePlot(SCLC_object, features = markers, order = F, cols = c("#f5f5f5", "#9b05f2"), keep.scale = "all") & NoAxes()
 SaveFigure(fp, "FeaturPlot_TFs_SCLC_PDX", width = 8, height = 10)
