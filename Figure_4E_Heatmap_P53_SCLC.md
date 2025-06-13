@@ -238,7 +238,7 @@
                 }
             },
             "inputs": [],
-            "label": "P53_CTRL_merged_sorted.bam.cpm.bw",
+            "label": "P53.CTRL.PDXS02730.cpm.bw",
             "name": "Extract dataset",
             "outputs": [
                 {
@@ -260,7 +260,7 @@
                 }
             },
             "tool_id": "__EXTRACT_DATASET__",
-            "tool_state": "{\"input\": {\"__class__\": \"ConnectedValue\"}, \"which\": {\"which_dataset\": \"by_identifier\", \"__current_case__\": 1, \"identifier\": \"P53_CTRL_merged_sorted.bam.cpm.bw\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_state": "{\"input\": {\"__class__\": \"ConnectedValue\"}, \"which\": {\"which_dataset\": \"by_identifier\", \"__current_case__\": 1, \"identifier\": \"P53.CTRL.PDXS02730.cpm.bw\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
             "tool_version": "1.0.1",
             "type": "tool",
             "uuid": "23a52da9-7ff4-47b8-9949-5b52444adfed",
@@ -279,7 +279,7 @@
                 }
             },
             "inputs": [],
-            "label": "P53_CHEM_merged_sorted.bam.cpm.bw",
+            "label": "P53.CHEM.PDXS02730.cpm.bw",
             "name": "Extract dataset",
             "outputs": [
                 {
@@ -301,7 +301,7 @@
                 }
             },
             "tool_id": "__EXTRACT_DATASET__",
-            "tool_state": "{\"input\": {\"__class__\": \"ConnectedValue\"}, \"which\": {\"which_dataset\": \"by_identifier\", \"__current_case__\": 1, \"identifier\": \"P53_CHEM_merged_sorted.bam.cpm.bw\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
+            "tool_state": "{\"input\": {\"__class__\": \"ConnectedValue\"}, \"which\": {\"which_dataset\": \"by_identifier\", \"__current_case__\": 1, \"identifier\": \"P53.CHEM.PDXS02730.cpm.bw\"}, \"__page__\": 0, \"__rerun_remap_job_id__\": null}",
             "tool_version": "1.0.1",
             "type": "tool",
             "uuid": "10b73b1c-e865-4fc4-aec5-dd8b74ae217d",
