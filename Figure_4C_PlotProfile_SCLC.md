@@ -30,8 +30,8 @@ done
 #SBATCH --mem=16gb
 #SBATCH --cpus-per-task=15
 module load use.own && module load pypack/deeptools
-computeMatrix reference-point -S POU2F3_CTRL_merged_sorted.bam.cpm.bw \
-                              POU2F3_CHEM_merged_sorted.bam.cpm.bw \
+computeMatrix reference-point -S POU2F3.CTRL.PDXS02730.cpm.bw \
+                              POU2F3.CHEM.PDXS02730.cpm.bw \
                               -R /scratch/phunold/PDX_SCLC/fastq/alignment/bam/bam_down/PP/POU2F3_e2f_targets_sorted.bed \
                               --beforeRegionStartLength 1000 \
                               --afterRegionStartLength 250 \
