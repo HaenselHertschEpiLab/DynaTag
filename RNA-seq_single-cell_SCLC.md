@@ -24,8 +24,8 @@ conda activate /opt/rrzk/software/conda-envs/ParseBioscience-1.0.6p/
 split-pipe \
 --m all \
 --chemistry V2 \
---fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-1-cat_S1_L001_R1_001.fastq.gz \
---fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-1-cat_S1_L001_R2_001.fastq.gz \
+--fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-1-PDXS02730_R1_001.fastq.gz \
+--fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-1-PDXS02730_R2_001.fastq.gz \
 --output_dir /projects/ag-haensel/Pascal/SCLC/PDX/S1 \
 --sample SCLC_CTRL_1 C9-C12 \
 --sample SCLC_CTRL_2 D1-D4 \
@@ -54,8 +54,8 @@ conda activate /opt/rrzk/software/conda-envs/ParseBioscience-1.0.6p/
 split-pipe \
 --m all \
 --chemistry V2 \
---fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-2-cat_S2_L001_R1_001.fastq.gz \
---fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-2-cat_S2_L001_R2_001.fastq.gz \
+--fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-2-PDXS02730_R1_001.fastq.gz \
+--fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-2-PDXS02730_R2_001.fastq.gz \
 --output_dir /projects/ag-haensel/Pascal/SCLC/PDX/S2 \
 --sample SCLC_CTRL_1 C9-C12 \
 --sample SCLC_CTRL_2 D1-D4 \
@@ -84,8 +84,8 @@ conda activate /opt/rrzk/software/conda-envs/ParseBioscience-1.0.6p/
 split-pipe \
 --m all \
 --chemistry V2 \
---fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-3-cat_S3_L001_R1_001.fastq.gz \
---fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-3-cat_S3_L001_R2_001.fastq.gz \
+--fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-3-PDXS02730_R1_001.fastq.gz \
+--fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-3-PDXS02730_R2_001.fastq.gz \
 --output_dir /projects/ag-haensel/Pascal/SCLC/PDX/S3 \
 --sample SCLC_CTRL_1 C9-C12 \
 --sample SCLC_CTRL_2 D1-D4 \
@@ -114,8 +114,8 @@ conda activate /opt/rrzk/software/conda-envs/ParseBioscience-1.0.6p/
 split-pipe \
 --m all \
 --chemistry V2 \
---fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-4-cat_S4_L001_R1_001.fastq.gz \
---fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-4-cat_S4_L001_R2_001.fastq.gz \
+--fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-4-PDXS02730_R1_001.fastq.gz \
+--fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-4-PDXS02730_R2_001.fastq.gz \
 --output_dir /projects/ag-haensel/Pascal/SCLC/PDX/S4 \
 --sample SCLC_CTRL_1 C9-C12 \
 --sample SCLC_CTRL_2 D1-D4 \
@@ -144,8 +144,8 @@ conda activate /opt/rrzk/software/conda-envs/ParseBioscience-1.0.6p/
 split-pipe \
 --m all \
 --chemistry V2 \
---fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-5-cat_S5_L001_R1_001.fastq.gz \
---fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-5-cat_S5_L001_R2_001.fastq.gz \
+--fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-5-PDXS02730_R1_001.fastq.gz \
+--fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-5-PDXS02730_R2_001.fastq.gz \
 --output_dir /projects/ag-haensel/Pascal/SCLC/PDX/S5 \
 --sample SCLC_CTRL_1 C9-C12 \
 --sample SCLC_CTRL_2 D1-D4 \
@@ -174,8 +174,8 @@ conda activate /opt/rrzk/software/conda-envs/ParseBioscience-1.0.6p/
 split-pipe \
 --m all \
 --chemistry V2 \
---fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-6-cat_S6_L001_R1_001.fastq.gz \
---fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-6-cat_S6_L001_R2_001.fastq.gz \
+--fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-6-PDXS02730_R1_001.fastq.gz \
+--fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-6-PDXS02730_R2_001.fastq.gz \
 --output_dir /projects/ag-haensel/Pascal/SCLC/PDX/S6 \
 --sample SCLC_CTRL_1 C9-C12 \
 --sample SCLC_CTRL_2 D1-D4 \
@@ -204,8 +204,8 @@ conda activate /opt/rrzk/software/conda-envs/ParseBioscience-1.0.6p/
 split-pipe \
 --m all \
 --chemistry V2 \
---fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-7-cat_S7_L001_R1_001.fastq.gz \
---fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-7-cat_S7_L001_R2_001.fastq.gz \
+--fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-7-PDXS02730_R1_001.fastq.gz \
+--fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-7-PDXS02730_R2_001.fastq.gz \
 --output_dir /projects/ag-haensel/Pascal/SCLC/PDX/S7 \
 --sample SCLC_CTRL_1 C9-C12 \
 --sample SCLC_CTRL_2 D1-D4 \
@@ -234,8 +234,8 @@ conda activate /opt/rrzk/software/conda-envs/ParseBioscience-1.0.6p/
 split-pipe \
 --m all \
 --chemistry V2 \
---fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-8-cat_S8_L001_R1_001.fastq.gz \
---fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-8-cat_S8_L001_R2_001.fastq.gz \
+--fq1 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-8-PDXS02730_R1_001.fastq.gz \
+--fq2 /projects/ag-haensel/raw_data/RNA_Seq/PARSE/2023-05-14_WT_full_scale_RPchmeo_CDXchemo_RPM/cat_fastq/SubLib-8-PDXS02730_R2_001.fastq.gz \
 --output_dir /projects/ag-haensel/Pascal/SCLC/PDX/S8 \
 --sample SCLC_CTRL_1 C9-C12 \
 --sample SCLC_CTRL_2 D1-D4 \
@@ -318,10 +318,10 @@ ReadObject <- function(name){
 ## Read in and merge Data
 ```R
 # 1. Reading in Seurat objects
-SCLC_PDX_CTRL_1 <- readRDS("/Users/pascalhunold/Desktop/PhD_Documentation/SCLC/snRNAseq/SCLC_PDX/SCLC_PDX_CTRL_1/DGE_filteredSCLC_PDX_CTRL_1_after_PCA_SCT.RDS")
-SCLC_PDX_CTRL_2 <- readRDS("/Users/pascalhunold/Desktop/PhD_Documentation/SCLC/snRNAseq/SCLC_PDX/SCLC_PDX_CTRL_2/DGE_filteredSCLC_PDX_CTRL_2_after_PCA_SCT.RDS")
-SCLC_PDX_CHEM_1 <- readRDS("/Users/pascalhunold/Desktop/PhD_Documentation/SCLC/snRNAseq/SCLC_PDX/SCLC_PDX_CHEM_1/DGE_filteredSCLC_PDX_CHEM_1_after_PCA_SCT.RDS")
-SCLC_PDX_CHEM_2 <- readRDS("/Users/pascalhunold/Desktop/PhD_Documentation/SCLC/snRNAseq/SCLC_PDX/SCLC_PDX_CHEM_2/DGE_filteredSCLC_PDX_CHEM_2_after_PCA_SCT.RDS")
+SCLC_PDX_CTRL_1 <- readRDS("/Users/pascalhunold/Desktop/PhD_Documentation/SCLC/snRNAseq/SCLC_PDX/SCLC_PDXS02730_CTRL_1/DGE_filteredSCLC_PDXS02730_CTRL_1_after_PCA_SCT.RDS")
+SCLC_PDX_CTRL_2 <- readRDS("/Users/pascalhunold/Desktop/PhD_Documentation/SCLC/snRNAseq/SCLC_PDX/SCLC_PDXS02730_CTRL_2/DGE_filteredSCLC_PDXS02730_CTRL_2_after_PCA_SCT.RDS")
+SCLC_PDX_CHEM_1 <- readRDS("/Users/pascalhunold/Desktop/PhD_Documentation/SCLC/snRNAseq/SCLC_PDX/SCLC_PDXS02730_CHEM_1/DGE_filteredSCLC_PDXS02730_CHEM_1_after_PCA_SCT.RDS")
+SCLC_PDX_CHEM_2 <- readRDS("/Users/pascalhunold/Desktop/PhD_Documentation/SCLC/snRNAseq/SCLC_PDX/SCLC_PDXS02730_CHEM_2/DGE_filteredSCLC_PDXS02730_CHEM_2_after_PCA_SCT.RDS")
 
 # Add treatment status
 SCLC_PDX_CTRL_1$treatment_status <- "Control"
